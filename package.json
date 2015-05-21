@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "serve-dev": "nodemon --ext coffee,js --ignore tmp/ src/server/server.js",
-    "serve-production": "node lib/server/server.js",
+    "serve-production": "node src/server/server.js",
     "dev": "npm run serve-dev",
     "start": "npm run serve-production",
     "test": "mocha --recursive --compilers coffee:coffee-script/register"
