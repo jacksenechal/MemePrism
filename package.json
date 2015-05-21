@@ -1,0 +1,33 @@
+{
+  "name": "memeprism",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "serve-dev": "nodemon --ext coffee,js --ignore tmp/ src/server/server.js",
+    "serve-production": "node lib/server/server.js",
+    "dev": "npm run serve-dev",
+    "start": "npm run serve-production",
+    "test": "mocha --recursive --compilers coffee:coffee-script/register"
+  },
+  "authors": [
+    "Duke Dorje <duke@citizencode.io>",
+    "Harlan T Wood <harlan@citizencode.io>",
+    "Noah Thorp <noah@citizencode.io>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cayley": "^0.2.1",
+    "coffee-script": "^1.9.2",
+    "commander": "^2.8.1",
+    "express": "^4.12.4",
+    "lightsaber": "^0.4.1"
+  },
+  "devDependencies": {
+    "dotenv": "^1.1.0",
+    "nodemon": "^1.3.7"
+  },
+  "engines": {
+    "node": "~0.10.38",
+    "npm": "^2.9.1"
+  }
+}
