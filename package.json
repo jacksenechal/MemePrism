@@ -20,7 +20,8 @@
     "coffee-script": "^1.9.2",
     "commander": "^2.8.1",
     "express": "^4.12.4",
-    "lightsaber": "^0.4.1"
+    "lightsaber": "^0.4.1",
+    "nightmare": "^1.8.1"
   },
   "devDependencies": {
     "dotenv": "^1.1.0",

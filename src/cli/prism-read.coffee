@@ -8,5 +8,4 @@ config
   .option '-g, --google-group <Google Group name>', 'Google Group name to import/update'
   .parse process.argv
 
-prism = new Prism
-prism.read config
+(new Prism).read config
