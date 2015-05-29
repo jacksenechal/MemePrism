@@ -2,17 +2,20 @@
 rest = require 'restler'
 
 class Wordpress
+  write: (config, message) ->
+    postData =
+      type: 'post'
+      status: 'draft'
+      title: message.get 'subject'
+      content_raw: message.get 'text'
+      date: message.get('date').toISOString()
 
-  write: (config) ->
-    url = config.wpUrl
-    username = config.wpUsername
-    password = config.wpPassword
-
-    # bin/prism-write -u http://104.236.184.200 -n name -p pass
-    # http://wp-api.org/guides/authentication.html
-    rest.get("#{url}/wp-json/posts").on 'complete', (data) ->
-      #console.log(data[0].sounds[0].sound[0].message); // auto convert to object
+    rest.post("#{config.wpUrl}/wp-json/posts",
+      username: config.wpUsername, password: config.wpPassword,
+      data: postData
+    ).on 'complete', (data, response)->
       log data
+
 
   oldWrite: (config) ->
     if config.wpUrl.search(/// ^https:// ///) is -1
