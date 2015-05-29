@@ -1,5 +1,9 @@
 # MemePrism
 
+## Setup
+
+    npm install
+
 ## Reading from Google Groups
 
 Example:
