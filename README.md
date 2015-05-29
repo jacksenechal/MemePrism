@@ -12,8 +12,7 @@ to see debugging output:
 
 Google Groups TOS seem to be here: https://groups.google.com/robots.txt
 
-## Scraping tech
+## Writing to Wordpress
 
-See also http://www.nightmarejs.org/
-
+Enable XML-RPC in your wordpress admin panel, in `Settings >>> Writing`, turn on `remote publishing`.
 
