@@ -20,7 +20,8 @@ class Prism
     if config.wpUrl and config.wpUsername and config.wpPassword
       (new Wordpress).write config, message
     else
-      log 'write not doing anything'
+      console.error 'No known target to write to'
+      process.exit 1
 
   update: (config) ->
     @read config, (email) =>

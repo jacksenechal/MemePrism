@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
 require('coffee-script/register');
-require('../src/cli/prism-write.coffee');
+require('../src/cli/subcommand.coffee').write();
