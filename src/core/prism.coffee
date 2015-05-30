@@ -1,32 +1,33 @@
+fs = require 'fs'
 { log, p } = require 'lightsaber'
 Wordpress = require '../adaptor/wordpress'
-fs = require 'fs'
-Email = require '../adaptor/email'
+EmailParser = require '../adaptor/email_parser'
 Message = require '../models/message'
 
 class Prism
   read: (config, callback) ->
+    callback ?= -> log arguments
+    emailParser = new EmailParser callback
     if config.emailFile
-      emailData = fs.readFileSync config.emailFile, encoding: 'utf8'
-      (new Email).read emailData, callback
+      emailParser.readFile config.emailFile
     else if config.emailDirectory
-      console.error 'Not yet implemented.'
-      process.exit 1
+      emailParser.readFiles config.emailDirectory
     else
       console.error 'No known source to read from'
       process.exit 1
 
-  write: (config, message) ->
+  write: (config, message, callback) ->
     if config.wpUrl and config.wpUsername and config.wpPassword
-      (new Wordpress).write config, message
+      (new Wordpress).write config, message, callback
     else
       console.error 'No known target to write to'
       process.exit 1
 
   update: (config) ->
     @read config, (email) =>
-      message = new Message(email)
-      @write(config, message)
+      message = new Message email
+      @write config, message, (data) ->
+        log "Wrote to wordpress: ID #{data?.ID} GUID #{data?.guid} :: #{data?.title}"
 
 
 module.exports = Prism

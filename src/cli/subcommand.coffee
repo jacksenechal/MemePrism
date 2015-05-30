@@ -16,7 +16,7 @@ class CLI
     ['option', '-p, --wp-password <Wordpress password>']
   ]
 
-  SUBCOMMANDS.update = SUBCOMMANDS.read[...]
+  SUBCOMMANDS.update = SUBCOMMANDS.read[...]    # make a copy of SUBCOMMANDS.read
   SUBCOMMANDS.update.push SUBCOMMANDS.write...
 
   exec: (subcommand) ->
