@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
 require('coffee-script/register');
-require('../src/cli/subcommand.coffee').write();
+require('../src/cli/subcommand.coffee').exec('write');
