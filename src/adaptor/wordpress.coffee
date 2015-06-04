@@ -7,7 +7,7 @@ class Wordpress
       type: 'post'
       status: 'draft'
       title: message.get 'subject'
-      content_raw: message.get 'html'
+      content_raw: message.get 'text'
       date: message.get('date').toISOString()
 
     request = rest.post("#{config.wpUrl}/wp-json/posts",
