@@ -22,8 +22,8 @@ class CLI
   exec: (subcommand) ->
     options = SUBCOMMANDS[subcommand]
     for option in options
-      [func, args...] = option
-      config = config[func](args...)
+      [methodName, args...] = option
+      config = config[methodName](args...)
 
     config.parse process.argv
     prism = new Prism
