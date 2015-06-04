@@ -1,23 +1,28 @@
 { log, p } = require 'lightsaber'
 fs = require 'fs'
+Promise = require("bluebird")
 MailParser = require("mailparser").MailParser
 
 class EmailParser
-  constructor: (@callback)->
-
   readFiles: (directoryName)->
     files = fs.readdirSync(directoryName)
-    files.forEach (file)=>
+    promises = Promise.map files, (file)=>
       filePath = directoryName+'/'+file
       if fs.lstatSync(filePath).isDirectory()
         @readFiles filePath
       else
         @readFile filePath
 
+    Promise.all(promises)
+
   readFile: (filename)->
-    parser = new MailParser
-    parser.on 'end', @callback
-    fs.createReadStream(filename).pipe(parser)
+    threadDirectory = filename.split('/')[-2..-2][0]
+    new Promise (resolve, reject) =>
+      parser = new MailParser
+      fs.createReadStream(filename).pipe(parser)
+      parser.on 'end', (email)->
+        email.threadId = threadDirectory
+        resolve email
 
   read: (emailData)->
     parser = new MailParser
