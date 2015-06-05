@@ -3,8 +3,6 @@ fs = require 'fs'
 Promise = require("bluebird")
 Wordpress = require '../adaptor/wordpress'
 EmailParser = require '../adaptor/email_parser'
-Message = require '../models/message'
-Thread = require '../models/thread'
 
 class Prism
   read: (config) ->
