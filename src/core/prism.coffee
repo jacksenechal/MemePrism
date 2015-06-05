@@ -20,9 +20,8 @@ class Prism
 
   write: (config, emails, callback) ->
     if config.wpUrl and config.wpUsername and config.wpPassword
-      wordpress = new Wordpress(config)
-      for email in emails
-        wordpress.writeMessage email, callback
+      wordpress = new Wordpress config
+      wordpress.writeThread emails, callback
     else
       console.error 'No known target to write to'
       process.exit 1
@@ -32,13 +31,11 @@ class Prism
 
     @read(config).then (results)=>
       for email in results
-        thread = @threads[email.threadId] || []
-        thread.push(email)
-        @threads[email.threadId] = thread
+        @threads[email.threadId] ?= []
+        @threads[email.threadId].push email
 
       for thread, emails of @threads
         @write config, emails, (data) ->
-          log "Wrote to wordpress: ID #{data?.ID} GUID #{data?.guid} :: #{data?.title}"
-
+          log "Wrote to wordpress: ID #{data.ID} GUID #{data.guid} :: #{data.title}"
 
 module.exports = Prism
