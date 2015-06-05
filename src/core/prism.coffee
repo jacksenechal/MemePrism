@@ -16,24 +16,26 @@ class Prism
       process.exit 1
 
 
-  write: (config, emails, callback) ->
+  write: (config, threads, callback) ->
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
-      wordpress.writeThread emails, callback
+      wordpress.buildThreadMapping().then =>
+        for threadId, thread of threads
+          wordpress.writeThread(thread).then callback
     else
-      console.error 'No known target to write to'
+      console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1
 
   update: (config) ->
-    @threads = {}
+    threads = {}
 
     @read(config).then (results)=>
+      results = [].concat results... # flatten array of arrays if recursing subdirectories
       for email in results
-        @threads[email.threadId] ?= []
-        @threads[email.threadId].push email
+        threads[email.threadId] ?= []
+        threads[email.threadId].push email
 
-      for thread, emails of @threads
-        @write config, emails, (data) ->
-          log "Wrote to wordpress: ID #{data.ID} GUID #{data.guid} :: #{data.title}"
+      @write config, threads, (data) ->
+        log "Wrote to wordpress: ID #{data.ID} GUID #{data.guid} :: #{data.title}"
 
 module.exports = Prism

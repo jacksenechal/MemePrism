@@ -4,26 +4,25 @@ rest = require 'restler'
 escape = require 'escape-html'
 
 class Wordpress
-  threadIdToPostId: {}
+  threadMapping: {}
 
   constructor: (@config)->
-    @buildThreadMapping()
 
   buildThreadMapping: ->
     @listAllPosts().then (posts)=>
       for post in posts
         for meta in post.post_meta
           if meta.key == 'threadId'
-            @threadIdToPostId[meta.value] = post.ID
+            @threadMapping[meta.value] = post.ID
             break
 
   listAllPosts: ->
-    request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=any&context=edit",
-      username: @config.wpUsername, password: @config.wpPassword
-    new Promise (resolve, reject)->
+    new Promise (resolve, reject)=>
+      request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=any&context=edit",
+        username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
 
-  writeThread: (messages, callback) ->
+  writeThread: (messages) ->
     messages.sort (a, b) -> a.date - b.date
     originalMessage = messages[0]
     postContent = @formatPost messages
@@ -32,16 +31,7 @@ class Wordpress
       title: originalMessage.subject
       threadId: originalMessage.threadId
 
-#    @findMessageByThreadId originalMessage.threadId
-    @writeMessage postContent, options, callback
-
-
-  findMessageByThreadId: (threadId) ->
-    request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[meta_key]=threadId&filter[meta_value]=#{threadId}",
-      username: @config.wpUsername, password: @config.wpPassword
-    request.on 'complete', (data)->
-      for d in data
-        log d.ID
+    @createOrUpdateMessage postContent, options
 
   formatPost: (messages) ->
     contents = for message in messages
@@ -67,22 +57,28 @@ class Wordpress
     cleanText = escape cleanText
     message.cleanText = cleanText
 
-  writeMessage: (postContent, options, callback) ->
+  createOrUpdateMessage: (postContent, options) ->
+    postId = @threadMapping[options.threadId]
+
     data =
       type: 'post'
       status: 'draft'
       title: options.title
       content_raw: postContent
       date: options.date.toISOString()
-      post_meta: {key: 'threadId', value: options.threadId}
 
-    request = rest.post "#{@config.wpUrl}/wp-json/posts",
-      username: @config.wpUsername, password: @config.wpPassword,
-      data: data
+    if postId?
+      request = rest.put "#{@config.wpUrl}/wp-json/posts/#{postId}",
+        username: @config.wpUsername, password: @config.wpPassword,
+        data: data
+    else
+      data.post_meta = [{key: 'threadId', value: options.threadId}]
+
+      request = rest.post "#{@config.wpUrl}/wp-json/posts",
+        username: @config.wpUsername, password: @config.wpPassword,
+        data: data
 
     new Promise (resolve, reject) ->
-      request.on 'complete', (data) ->
-        callback(data) if callback?
-        resolve(data)
+      request.on 'complete', resolve
 
 module.exports = Wordpress
