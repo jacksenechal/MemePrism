@@ -1,6 +1,7 @@
 { log, p } = require 'lightsaber'
 Promise = require "bluebird"
 rest = require 'restler'
+api = require 'wordpress'
 
 class Wordpress
   constructor: (@config)->
@@ -35,19 +36,51 @@ class Wordpress
         callback(data) if callback?
         resolve(data)
 
-#  writeComment: (message, callback) ->
-#    commentData =
-#      type: 'comment'
-#      status: 'draft'
-#      title: message.get 'subject'
-#      content_raw: message.get 'text'
-#      date: message.get('date').toISOString()
-#
-#    request = rest.post("#{config.wpUrl}/wp-json/posts",
+  writeComment: (postId, message, callback) ->
+    data =
+      type: 'comment'
+      status: 'approved'
+      content: message.text
+      date: message.date.toISOString()
+      post_id: postId
+
+#    request = rest.post("#{@config.wpUrl}/wp-json/posts/#{postId}/comments",
 #      username: @config.wpUsername, password: @config.wpPassword,
-#      data: commentData
+#      data: data
 #    )
-#
-#    request.on 'complete', callback if callback?
+
+    if @config.wpUrl.search(/// ^https:// ///) is -1
+      console.error "\nWARNING: Depending on your host, Wordpress URL may need to start with https://\n"
+    client = api.createClient
+      url: @config.wpUrl
+      username: @config.wpUsername
+      password: @config.wpPassword
+
+    p 555, data
+    client.newComment data, -> log 111, arguments..., 222
+
+    request.on 'complete', callback if callback?
 
 module.exports = Wordpress
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
