@@ -1,6 +1,6 @@
 fs = require 'fs'
 { log, p } = require 'lightsaber'
-Promise = require("bluebird")
+Promise = require 'bluebird'
 Wordpress = require '../adaptor/wordpress'
 EmailParser = require '../adaptor/email_parser'
 
