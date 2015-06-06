@@ -12,7 +12,7 @@ class EmailParser
         @readFiles filePath
       else
         @readFile filePath
-    , concurrency: 10
+    , concurrency: 25
 
     Promise.all(promises)
 

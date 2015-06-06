@@ -1,4 +1,5 @@
-{ log, p, json } = require 'lightsaber'
+{ json, log, p, pjson } = require 'lightsaber'
+{ compact } = require 'lodash'
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
@@ -36,26 +37,29 @@ class Wordpress
   formatPost: (messages) ->
     contents = for message in messages
       @cleanMessage message
-      """
-        <section>
-          <h3>#{message.fromName}</h3>
-          <p>
-            <i>#{message.date}</i>
-          </p>
-          <div>
-            <b>#{message.cleanText}</b>
-          </div>
-        </section>
-      """
-    contents.join "\n<hr />\n"
+      if message.id
+        """
+          <section>
+            <h3>#{message.fromName}</h3>
+            <p>
+              <i>#{message.date}</i>
+            </p>
+            <div>
+              <b>#{message.cleanText}</b>
+            </div>
+          </section>
+        """
+    (compact contents).join "\n\n<hr />\n\n"
 
   cleanMessage: (message) ->
-    @cleanText message
-    message.fromName = message.from?[0]?.name
-    unless message.fromName
-      console.error "No name found :: message.from is #{json message.from} :: message ID is #{message.headers?['message-id']}"
-    unless message.date
-      console.error "No date found :: message ID is #{message.headers?['message-id']}"
+    throw pjson(message) if message.id?  # make sure the is no .id already
+    if message.id = message.headers?['message-id']
+      @cleanText message
+      message.fromName = message.from?[0]?.name or message.from?[0]?.address
+      unless message.fromName
+        console.error "No name found :: message.from is #{json message.from} :: message ID is #{message.id}"
+      unless message.date
+        console.error "No date found :: message ID is #{message.id}"
 
   cleanText: (message) ->
     cleanText = message.text

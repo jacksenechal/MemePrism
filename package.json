@@ -2,8 +2,7 @@
   "name": "memeprism",
   "version": "0.0.0",
   "description": "Meme extraction and analysis",
-  "scripts": {
-  },
+  "scripts": {},
   "authors": [
     "Duke Dorje <duke@citizencode.io>",
     "Harlan T Wood <harlan@citizencode.io>",
@@ -17,6 +16,7 @@
     "escape-html": "^1.0.1",
     "express": "^4.12.4",
     "lightsaber": "^0.4.1",
+    "lodash": "^3.9.3",
     "mailparser": "^0.5.1",
     "restler": "^3.2.2"
   },
