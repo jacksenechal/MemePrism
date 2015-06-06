@@ -16,6 +16,7 @@ class Wordpress
           if meta.key == 'threadId'
             @threadMapping[meta.value] = post.ID
             break
+      log pjson @threadMapping
 
   listAllPosts: ->
     new Promise (resolve, reject) =>
@@ -26,13 +27,15 @@ class Wordpress
   writeThread: (messages) ->
     messages.sort (a, b) -> a.date - b.date
     originalMessage = messages[0]
-    postContent = @formatPost messages
-    options =
-      date: originalMessage.date
-      title: originalMessage.subject
-      threadId: originalMessage.threadId
-
-    @createOrUpdateMessage postContent, options
+    postContent = @formatPost(messages)
+    if postContent
+      options =
+        date: originalMessage.date
+        title: originalMessage.subject or throw new Error "No subject for message #{json originalMessage}"
+        threadId: originalMessage.threadId
+      @createOrUpdateMessage postContent, options
+    else
+      Promise.resolve()
 
   formatPost: (messages) ->
     contents = for message in messages
@@ -52,7 +55,7 @@ class Wordpress
     (compact contents).join "\n\n<hr />\n\n"
 
   cleanMessage: (message) ->
-    throw pjson(message) if message.id?  # make sure the is no .id already
+    throw pjson(message) if message.id?  # make sure there is no message.id already
     if message.id = message.headers?['message-id']
       @cleanText message
       message.fromName = message.from?[0]?.name or message.from?[0]?.address

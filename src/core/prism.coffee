@@ -36,6 +36,9 @@ class Prism
         threads[email.threadId].push email
 
       @write config, threads, (data) ->
-        log "Wrote to wordpress: ID #{data.ID} GUID #{data.guid} :: #{data.title}"
+        if data?.ID?
+          log "Wrote to wordpress: ID #{data.ID} GUID #{data.guid}"  # " :: #{data.title}"
+        else
+          console.error data or "UNPROCESSABLE"
 
 module.exports = Prism
