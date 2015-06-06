@@ -6,12 +6,13 @@ MailParser = require("mailparser").MailParser
 class EmailParser
   readFiles: (directoryName)->
     files = fs.readdirSync(directoryName)
-    promises = Promise.map files, (file)=>
+    promises = Promise.map files, (file) =>
       filePath = directoryName+'/'+file
       if fs.lstatSync(filePath).isDirectory()
         @readFiles filePath
       else
         @readFile filePath
+    , concurrency: 10
 
     Promise.all(promises)
 
@@ -22,12 +23,13 @@ class EmailParser
       fs.createReadStream(filename).pipe(parser)
       parser.on 'end', (email)->
         email.threadId = threadDirectory
+#        log email.headers['message-id']
         resolve email
 
-  read: (emailData)->
-    parser = new MailParser
-    parser.on 'end', @callback
-    parser.write emailData
-    parser.end()
+#  read: (emailData)->
+#    parser = new MailParser
+#    parser.on 'end', @callback
+#    parser.write emailData
+#    parser.end()
 
 module.exports = EmailParser

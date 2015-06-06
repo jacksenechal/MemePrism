@@ -1,4 +1,4 @@
-{ log, p } = require 'lightsaber'
+{ log, p, json } = require 'lightsaber'
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
@@ -6,10 +6,10 @@ escape = require 'escape-html'
 class Wordpress
   threadMapping: {}
 
-  constructor: (@config)->
+  constructor: (@config) ->
 
   buildThreadMapping: ->
-    @listAllPosts().then (posts)=>
+    @listAllPosts().then (posts) =>
       for post in posts
         for meta in post.post_meta
           if meta.key == 'threadId'
@@ -17,7 +17,7 @@ class Wordpress
             break
 
   listAllPosts: ->
-    new Promise (resolve, reject)=>
+    new Promise (resolve, reject) =>
       request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=any&context=edit",
         username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
@@ -38,7 +38,7 @@ class Wordpress
       @cleanMessage message
       """
         <section>
-          <h3>#{message.from[0].name}</h3>
+          <h3>#{message.fromName}</h3>
           <p>
             <i>#{message.date}</i>
           </p>
@@ -50,9 +50,17 @@ class Wordpress
     contents.join "\n<hr />\n"
 
   cleanMessage: (message) ->
+    @cleanText message
+    message.fromName = message.from?[0]?.name
+    unless message.fromName
+      console.error "No name found :: message.from is #{json message.from} :: message ID is #{message.headers?['message-id']}"
+    unless message.date
+      console.error "No date found :: message ID is #{message.headers?['message-id']}"
+
+  cleanText: (message) ->
     cleanText = message.text
     cleanText = cleanText.replace /<mailto:.+?>/g, ''
-    cleanText = cleanText.replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/g, ''
+    cleanText = cleanText.replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
     cleanText = cleanText.replace /\n\s*>.*?$/gm, ''
     cleanText = escape cleanText
     message.cleanText = cleanText
@@ -62,10 +70,10 @@ class Wordpress
 
     data =
       type: 'post'
-      status: 'draft'
+      status: 'publish'
       title: options.title
       content_raw: postContent
-      date: options.date.toISOString()
+      date: options.date?.toISOString()
 
     if postId?
       request = rest.put "#{@config.wpUrl}/wp-json/posts/#{postId}",
