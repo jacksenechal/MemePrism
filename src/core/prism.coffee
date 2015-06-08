@@ -20,8 +20,8 @@ class Prism
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
-        for threadId, thread of threads
-          wordpress.writeThread(thread).then callback
+#        for threadId, thread of threads
+#          wordpress.writeThread(thread).then callback
     else
       console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1

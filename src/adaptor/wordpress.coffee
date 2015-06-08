@@ -9,19 +9,30 @@ class Wordpress
 
   constructor: (@config) ->
 
-  buildThreadMapping: ->
-    @listAllPosts().then (posts) =>
+  buildThreadMapping: (pageNum)->
+    pageNum ?= 1
+    promise = @listPageOfPosts(pageNum).then (posts) =>
+#      log posts
+#      exit 1
+      return if !(posts instanceof Array) or posts.length is 0
       for post in posts
         for meta in post.post_meta
           if meta.key == 'threadId'
             @threadMapping[meta.value] = post.ID
             break
       log pjson @threadMapping
+      @buildThreadMapping(pageNum+1)
+    log pjson @threadMapping
+    promise
 
-  listAllPosts: ->
+  listPageOfPosts: (pageNumber) ->
     new Promise (resolve, reject) =>
-      request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=any&context=edit",
-        username: @config.wpUsername, password: @config.wpPassword
+      url = "#{@config.wpUrl}/wp-json/posts?" +
+          "filter[post_status]=any&" +
+          "context=edit&filter[posts_per_page]=10&" +
+          "filter[paged]=#{pageNumber}&"
+      log url
+      request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
 
   writeThread: (messages) ->
