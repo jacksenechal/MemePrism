@@ -1,5 +1,5 @@
 { json, log, p, pjson } = require 'lightsaber'
-{ compact } = require 'lodash'
+_ = require 'lodash'
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
@@ -12,26 +12,23 @@ class Wordpress
   buildThreadMapping: (pageNum)->
     pageNum ?= 1
     promise = @listPageOfPosts(pageNum).then (posts) =>
-#      log posts
-#      exit 1
-      return if !(posts instanceof Array) or posts.length is 0
+      return if _.isEmpty posts
       for post in posts
         for meta in post.post_meta
           if meta.key == 'threadId'
             @threadMapping[meta.value] = post.ID
             break
-      log pjson @threadMapping
       @buildThreadMapping(pageNum+1)
-    log pjson @threadMapping
+#    log pjson @threadMapping
     promise
 
   listPageOfPosts: (pageNumber) ->
+    postsPerPage = 10
+    log "Fetching page #{pageNumber}"
     new Promise (resolve, reject) =>
       url = "#{@config.wpUrl}/wp-json/posts?" +
-          "filter[post_status]=any&" +
-          "context=edit&filter[posts_per_page]=10&" +
-          "filter[paged]=#{pageNumber}&"
-      log url
+          "filter[post_status]=any&context=edit&" +
+          "filter[offset]=#{(pageNumber-1)*postsPerPage}"
       request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
 
@@ -63,7 +60,7 @@ class Wordpress
             </div>
           </section>
         """
-    (compact contents).join "\n\n<hr />\n\n"
+    (_.compact contents).join "\n\n<hr />\n\n"
 
   cleanMessage: (message) ->
     throw pjson(message) if message.id?  # make sure there is no message.id already

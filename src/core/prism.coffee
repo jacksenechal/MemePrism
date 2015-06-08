@@ -1,6 +1,7 @@
 fs = require 'fs'
 { log, p } = require 'lightsaber'
 Promise = require 'bluebird'
+_ = require 'lodash'
 Wordpress = require '../adaptor/wordpress'
 EmailParser = require '../adaptor/email_parser'
 
@@ -20,8 +21,8 @@ class Prism
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
-#        for threadId, thread of threads
-#          wordpress.writeThread(thread).then callback
+        for threadId, thread of threads
+          wordpress.writeThread(thread).then callback
     else
       console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1
@@ -30,7 +31,7 @@ class Prism
     threads = {}
 
     @read(config).then (results)=>
-      results = [].concat results... # flatten array of arrays if recursing subdirectories
+      results = _.flatten(results) # flatten array of arrays if recursing subdirectories
       for email in results
         threads[email.threadId] ?= []
         threads[email.threadId].push email
