@@ -3,6 +3,7 @@
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
+debugWp = require('debug')('wordpress')
 
 class Wordpress
   threadMapping: {}
@@ -13,10 +14,10 @@ class Wordpress
     @listAllPosts().then (posts) =>
       for post in posts
         for meta in post.post_meta
-          if meta.key == 'threadId'
+          if meta.key is 'threadId'
             @threadMapping[meta.value] = post.ID
             break
-      log pjson @threadMapping
+      debugWp pjson @threadMapping
 
   listAllPosts: ->
     new Promise (resolve, reject) =>
@@ -83,12 +84,14 @@ class Wordpress
       date: options.date?.toISOString()
 
     if postId?
-      request = rest.put "#{@config.wpUrl}/wp-json/posts/#{postId}",
+      postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
+      debugWp "Updating: #{postId} :: #{data.date} :: #{data.title}"
+      request = rest.put postUrl,
         username: @config.wpUsername, password: @config.wpPassword,
         data: data
     else
+      debugWp "Creating: #{data.date} :: #{data.title}"
       data.post_meta = [{key: 'threadId', value: options.threadId}]
-
       request = rest.post "#{@config.wpUrl}/wp-json/posts",
         username: @config.wpUsername, password: @config.wpPassword,
         data: data

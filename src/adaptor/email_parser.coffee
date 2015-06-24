@@ -23,7 +23,6 @@ class EmailParser
       fs.createReadStream(filename).pipe(parser)
       parser.on 'end', (email)->
         email.threadId = threadDirectory
-#        log email.headers['message-id']
         resolve email
 
 #  read: (emailData)->
