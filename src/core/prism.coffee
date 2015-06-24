@@ -21,6 +21,7 @@ class Prism
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
+        log 1, pjson wordpress.threadMapping
         for threadId, thread of threads
           wordpress.writeThread(thread).then callback
     else

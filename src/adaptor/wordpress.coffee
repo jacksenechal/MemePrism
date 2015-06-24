@@ -18,7 +18,6 @@ class Wordpress
           if meta.key is 'threadId'
             @threadMapping[meta.value] = post.ID
             break
-      #      log 1, pjson @threadMapping
       @buildThreadMapping(pageNum+1)
 
   listPageOfPosts: (pageNumber) ->
