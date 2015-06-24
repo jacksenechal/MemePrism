@@ -3,11 +3,15 @@ _ = require 'lodash'
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
+debugWp = require('debug')('wordpress')
 
 class Wordpress
   threadMapping: {}
 
   constructor: (@config) ->
+
+  debug: (args...) ->
+    debugWp args...
 
   buildThreadMapping: (pageNum) ->
     pageNum ?= 1
@@ -59,7 +63,7 @@ class Wordpress
             </div>
           </section>
         """
-    (_.compact contents).join "\n\n<hr />\n\n"
+    _.compact(contents).join "\n\n<hr />\n\n"
 
   cleanMessage: (message) ->
     throw pjson(message) if message.id?  # make sure there is no message.id already
@@ -84,18 +88,20 @@ class Wordpress
 
     data =
       type: 'post'
-      status: 'publish'
+      status: 'private'  # 'publish'
       title: options.title
       content_raw: postContent
       date: options.date?.toISOString()
 
     if postId?
-      request = rest.put "#{@config.wpUrl}/wp-json/posts/#{postId}",
+      postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
+      @debug "Updating: #{postId} :: #{data.date} :: #{data.title}"
+      request = rest.put postUrl,
         username: @config.wpUsername, password: @config.wpPassword,
         data: data
     else
+      @debug "Creating: #{data.date} :: #{data.title}"
       data.post_meta = [{key: 'threadId', value: options.threadId}]
-
       request = rest.post "#{@config.wpUrl}/wp-json/posts",
         username: @config.wpUsername, password: @config.wpPassword,
         data: data

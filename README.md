@@ -4,19 +4,15 @@
 
     npm install
 
-## Reading from Google Groups
+## Publishing to Wordpress from a folder of emails (in mbox format)
+
+Prerequisite:
+
+Getting help:
+
+     bin/prism update -h
 
 Example:
 
-    bin/prism-read -g camlistore
-    
-to see debugging output:
-
-    DEBUG=nightmare bin/prism-read -g camlistore
-
-Google Groups TOS seem to be here: https://groups.google.com/robots.txt
-
-## Writing to Wordpress
-
-Enable XML-RPC in your wordpress admin panel, in `Settings >>> Writing`, turn on `remote publishing`.
+    bin/prism update  --wp-url http://domain.of.your.wordpress.installation --wp-username <USERNAME> --wp-password <PASSWORD> --email-directory any/relative/path/to/emails/ 
 
