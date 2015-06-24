@@ -9,25 +9,25 @@ class Wordpress
 
   constructor: (@config) ->
 
-  buildThreadMapping: (pageNum)->
+  buildThreadMapping: (pageNum) ->
     pageNum ?= 1
-    promise = @listPageOfPosts(pageNum).then (posts) =>
+    @listPageOfPosts(pageNum).then (posts) =>
       return if _.isEmpty posts
       for post in posts
         for meta in post.post_meta
-          if meta.key == 'threadId'
+          if meta.key is 'threadId'
             @threadMapping[meta.value] = post.ID
             break
+      #      log 1, pjson @threadMapping
       @buildThreadMapping(pageNum+1)
-#    log pjson @threadMapping
-    promise
 
   listPageOfPosts: (pageNumber) ->
     postsPerPage = 10
     log "Fetching page #{pageNumber}"
     new Promise (resolve, reject) =>
       url = "#{@config.wpUrl}/wp-json/posts?" +
-          "filter[post_status]=any&context=edit&" +
+          "context=edit&" +
+          "filter[post_status]=any&" +
           "filter[offset]=#{(pageNumber-1)*postsPerPage}"
       request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve

@@ -30,8 +30,8 @@ class Prism
   update: (config) ->
     threads = {}
 
-    @read(config).then (results)=>
-      results = _.flatten(results) # flatten array of arrays if recursing subdirectories
+    @read(config).then (results) =>
+      results = _.flatten results # flatten array of arrays if recursing subdirectories
       for email in results
         threads[email.threadId] ?= []
         threads[email.threadId].push email
