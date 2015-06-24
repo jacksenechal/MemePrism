@@ -20,7 +20,7 @@ class Wordpress
 
   listAllPosts: ->
     new Promise (resolve, reject) =>
-      request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=any&context=edit",
+      request = rest.get "#{@config.wpUrl}/wp-json/posts?filter[post_status]=private&context=edit",
         username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
 
@@ -77,7 +77,7 @@ class Wordpress
 
     data =
       type: 'post'
-      status: 'publish'
+      status: 'private'  # 'publish'
       title: options.title
       content_raw: postContent
       date: options.date?.toISOString()
