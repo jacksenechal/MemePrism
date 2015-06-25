@@ -6,9 +6,10 @@ escape = require 'escape-html'
 debugWp = require('debug')('wordpress')
 
 class Wordpress
-  threadMapping: {}
 
   constructor: (@config) ->
+    @postToThread = {}
+    @threadToPost = {}
 
   debug: (args...) ->
     debugWp args...
@@ -20,7 +21,7 @@ class Wordpress
       for post in posts
         for meta in post.post_meta
           if meta.key is 'threadId'
-            @threadMapping[meta.value] = post.ID
+            @postToThread[post.ID] = meta.value
             break
       @buildThreadMapping(pageNum+1)
 
@@ -35,10 +36,29 @@ class Wordpress
       request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
 
+  massageThreadMaps: ->
+    threadToPosts = {}
+    for post, thread of @postToThread
+      threadToPosts[thread] ?= []
+      threadToPosts[thread].push post
+
+    errors = _.pick threadToPosts, (posts, thread) -> posts.length > 1
+    unless _.isEmpty errors
+      console.error "Fatal Error: Multiple wordpress posts for the following thread IDs:"
+      console.error "Please delete these posts and try again"
+      console.error pjson errors
+      process.exit 1
+
+    for thread, post of threadToPosts
+      @threadToPost[thread] = post[0]
+
+    @debug "Thread to post mapping:"
+    @debug pjson @threadToPost
+
   writeThread: (messages) ->
     messages.sort (a, b) -> a.date - b.date
     originalMessage = messages[0]
-    postContent = @formatPost(messages)
+    postContent = @formatPost messages
     if postContent
       options =
         date: originalMessage.date
@@ -84,7 +104,7 @@ class Wordpress
     message.cleanText = cleanText
 
   createOrUpdateMessage: (postContent, options) ->
-    postId = @threadMapping[options.threadId]
+    postId = @threadToPost[options.threadId]
 
     data =
       type: 'post'
