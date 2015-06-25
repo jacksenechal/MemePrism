@@ -1,5 +1,5 @@
 fs = require 'fs'
-{ log, p } = require 'lightsaber'
+{ log, p, pjson } = require 'lightsaber'
 Promise = require 'bluebird'
 _ = require 'lodash'
 Wordpress = require '../adaptor/wordpress'
@@ -21,7 +21,7 @@ class Prism
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
-        wordpress.debug pjson threadMapping
+        wordpress.debug pjson wordpress.threadMapping
         for threadId, thread of threads
           wordpress.writeThread(thread).then callback
     else

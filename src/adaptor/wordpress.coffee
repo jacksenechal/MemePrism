@@ -26,7 +26,7 @@ class Wordpress
 
   listPageOfPosts: (pageNumber) ->
     postsPerPage = 10
-    log "Fetching page #{pageNumber}"
+    @debug "Fetching thread IDs: page #{pageNumber}"
     new Promise (resolve, reject) =>
       url = "#{@config.wpUrl}/wp-json/posts?" +
           "context=edit&" +
