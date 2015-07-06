@@ -79,7 +79,7 @@ class Wordpress
               <i>#{message.date}</i>
             </p>
             <div>
-              <b>#{message.cleanText}</b>
+              #{message.cleanText}
             </div>
           </section>
         """
