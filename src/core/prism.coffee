@@ -4,6 +4,7 @@ Promise = require 'bluebird'
 _ = require 'lodash'
 Wordpress = require '../adaptor/wordpress'
 EmailParser = require '../adaptor/email_parser'
+debug = require('debug')('prism')
 
 class Prism
   read: (config) ->
@@ -20,10 +21,20 @@ class Prism
   write: (config, threads, callback) ->
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
+      debug "Building map of all existing threads."
       wordpress.buildThreadMapping().then =>
-        wordpress.massageThreadMaps()
-        for threadId, thread of threads
-          wordpress.writeThread(thread).then callback
+        # wordpress.massageThreadMaps()
+        debug "Writing threads to wordpress."
+
+        threadMessages = (v for k,v of threads) # just the messages
+        Promise.map threadMessages, (messages)=>
+          wordpress.writeThread(messages)
+        , concurrency: 5
+        .then callback
+        , -> console.error "Error!", arguments
+
+        # for threadId, thread of threads
+        #   wordpress.writeThread(thread).then callback
     else
       console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1

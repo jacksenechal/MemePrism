@@ -3,57 +3,68 @@ _ = require 'lodash'
 Promise = require "bluebird"
 rest = require 'restler'
 escape = require 'escape-html'
-debugWp = require('debug')('wordpress')
+debug = require('debug')('wordpress')
 
 class Wordpress
 
   constructor: (@config) ->
-    @postToThread = {}
-    @threadToPost = {}
+#    @postToThread = {}
+#    @threadToPost = {}
+    @threads = {}
 
   debug: (args...) ->
-    debugWp args...
+    debug args...
 
   buildThreadMapping: (pageNum) ->
     pageNum ?= 1
     @listPageOfPosts(pageNum).then (posts) =>
-      return if _.isEmpty posts
+#      return if _.isEmpty posts
+      debug posts
       for post in posts
         for meta in post.post_meta
           if meta.key is 'threadId'
-            @postToThread[post.ID] = meta.value
+            threadId = meta.value
+            if @threads[threadId]?
+              console.error("Duplicate post for #{threadId}: original: #{@threads[threadId]} duplicate: #{postId}")
+            else
+              debug(threadId, postId)
+              @threads[threadId] = postId
             break
       @buildThreadMapping(pageNum+1)
 
   listPageOfPosts: (pageNumber) ->
     postsPerPage = 10
-    @debug "Fetching thread IDs: page #{pageNumber}"
+    debug "Fetching thread IDs: page #{pageNumber}"
     new Promise (resolve, reject) =>
       url = "#{@config.wpUrl}/wp-json/posts?" +
           "context=edit&" +
           "filter[post_status]=any&" +
+          "filter[posts_per_page]=#{postsPerPage}" +
           "filter[offset]=#{(pageNumber-1)*postsPerPage}"
       request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
       request.on 'complete', resolve
+#      request.on 'success', resolve
+#      request.on 'fail', reject
 
-  massageThreadMaps: ->
-    threadToPosts = {}
-    for post, thread of @postToThread
-      threadToPosts[thread] ?= []
-      threadToPosts[thread].push post
-
-    errors = _.pick threadToPosts, (posts, thread) -> posts.length > 1
-    unless _.isEmpty errors
-      console.error "Fatal Error: Multiple wordpress posts for the following thread IDs:"
-      console.error "Please delete these posts and try again"
-      console.error pjson errors
-      process.exit 1
-
-    for thread, post of threadToPosts
-      @threadToPost[thread] = post[0]
-
-    @debug "Thread to post mapping:"
-    @debug pjson @threadToPost
+  # massageThreadMaps: ->
+  #   threadToPosts = {}
+  #   for post, thread of @postToThread
+  #     threadToPosts[thread] ?= []
+  #     threadToPosts[thread].push post
+  #
+  #   errors = _.pick threadToPosts, (posts, thread) -> posts.length > 1
+  #   unless _.isEmpty errors
+  #     console.error "Fatal Error: Multiple wordpress posts for the following thread IDs:"
+  #     console.error "Please delete these posts and try again"
+  #     console.error pjson errors
+  #     process.exit 1
+  #
+  #   for thread, post of threadToPosts
+  #     @threadToPost[thread] = post[0]
+  #
+  #   @debug pjson @postToThread
+  #   @debug "Thread to post mapping:"
+  #   @debug pjson @threadToPost
 
   writeThread: (messages) ->
     messages.sort (a, b) -> a.date - b.date
@@ -103,30 +114,29 @@ class Wordpress
     cleanText = escape cleanText
     message.cleanText = cleanText
 
-  createOrUpdateMessage: (postContent, options) ->
-    postId = @threadToPost[options.threadId]
-
+  createOrUpdateMessage: (postContent, options={}) ->
     data =
       type: 'post'
-      status: 'private'  # 'publish'
+      status: 'publish'
       title: options.title
       content_raw: postContent
       date: options.date?.toISOString()
+      post_meta: [{key: 'threadId', value: options.threadId}, {key: '_wpac_is_members_only', value: 'true'}]
 
+    postId = @threads[options.threadId]
     if postId?
-      postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
       @debug "Updating: #{postId} :: #{data.date} :: #{data.title}"
-      request = rest.put postUrl,
+      request = rest.put "#{@config.wpUrl}/wp-json/posts/#{postId}",
         username: @config.wpUsername, password: @config.wpPassword,
         data: data
     else
       @debug "Creating: #{data.date} :: #{data.title}"
-      data.post_meta = [{key: 'threadId', value: options.threadId}]
       request = rest.post "#{@config.wpUrl}/wp-json/posts",
         username: @config.wpUsername, password: @config.wpPassword,
         data: data
 
     new Promise (resolve, reject) ->
-      request.on 'complete', resolve
+      request.on 'success', resolve
+      request.on 'fail', reject
 
 module.exports = Wordpress
