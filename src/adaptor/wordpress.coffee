@@ -88,16 +88,18 @@ class Wordpress
   cleanMessage: (message) ->
     throw pjson(message) if message.id?  # make sure there is no message.id already
     if message.id = message.headers?['message-id']
-      message.cleanText = @cleanText message
+      message.cleanText = @cleanHtml message.text
       message.fromName = message.from?[0]?.name or message.from?[0]?.address
       unless message.fromName
         console.error "No name found :: message.from is #{json message.from} :: message ID is #{message.id}"
       unless message.date
         console.error "No date found :: message ID is #{message.id}"
 
-  cleanText: (message) ->
-    escapeHtml message.text
-      .replace /<mailto:.+?>/g, ''
+  cleanHtml: (text) -> escapeHtml text
+
+  cleanText: (text) ->
+    text
+      .replace /<mailto:.+?>/g, '<(removed)>'
       .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
       .replace /\n\s*>.*?$/gm, ''
 
