@@ -1,12 +1,12 @@
 # MemePrism
 
+[![Circle CI](https://circleci.com/gh/citizencode/MemePrism.svg?style=svg)](https://circleci.com/gh/citizencode/MemePrism)
+
 ## Setup
 
     npm install
 
 ## Publishing to Wordpress from a folder of emails (in mbox format)
-
-Prerequisite:
 
 Getting help:
 
