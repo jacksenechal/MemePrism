@@ -2,7 +2,7 @@
 _ = require 'lodash'
 Promise = require "bluebird"
 rest = require 'restler'
-escape = require 'escape-html'
+escapeHtml = require 'escape-html'
 debugWp = require('debug')('wordpress')
 
 class Wordpress
@@ -88,7 +88,7 @@ class Wordpress
   cleanMessage: (message) ->
     throw pjson(message) if message.id?  # make sure there is no message.id already
     if message.id = message.headers?['message-id']
-      @cleanText message
+      message.cleanText = @cleanText message
       message.fromName = message.from?[0]?.name or message.from?[0]?.address
       unless message.fromName
         console.error "No name found :: message.from is #{json message.from} :: message ID is #{message.id}"
@@ -96,12 +96,10 @@ class Wordpress
         console.error "No date found :: message ID is #{message.id}"
 
   cleanText: (message) ->
-    cleanText = message.text
-    cleanText = cleanText.replace /<mailto:.+?>/g, ''
-    cleanText = cleanText.replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
-    cleanText = cleanText.replace /\n\s*>.*?$/gm, ''
-    cleanText = escape cleanText
-    message.cleanText = cleanText
+    escapeHtml message.text
+      .replace /<mailto:.+?>/g, ''
+      .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
+      .replace /\n\s*>.*?$/gm, ''
 
   createOrUpdateMessage: (postContent, options) ->
     postId = @threadToPost[options.threadId]
