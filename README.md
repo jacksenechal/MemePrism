@@ -1,6 +1,6 @@
 # MemePrism
 
-[![Circle CI](https://circleci.com/gh/citizencode/MemePrism.svg?style=svg)](https://circleci.com/gh/citizencode/MemePrism)
+Build status: [![Circle CI](https://circleci.com/gh/citizencode/MemePrism.svg?style=svg)](https://circleci.com/gh/citizencode/MemePrism)
 
 ## Setup
 
