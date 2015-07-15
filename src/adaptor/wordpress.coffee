@@ -100,8 +100,9 @@ class Wordpress
   cleanText: (text) ->
     text
       .replace /<mailto:.+?>/g, '<(removed)>'
+      .replace /\b[\w.+-]+@[a-z0-9-.]+\b/ig, '<(removed)>'
       .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
-      .replace /\n\s*>.*?$/gm, ''
+      .replace /\n\s*>.*?$/gm, ''   # lines beginning with >
 
   createOrUpdateMessage: (postContent, options) ->
     postId = @threadToPost[options.threadId]
