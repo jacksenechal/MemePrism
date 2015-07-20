@@ -17,7 +17,8 @@ class EmailParser
     Promise.all(promises)
 
   readFile: (filename)->
-    threadDirectory = filename.split('/')[-2..-2][0]
+    filename = filename[0...-1] if filename.match(/// /$ ///)  # trim trailing slash
+    threadDirectory = filename.split('/')[-1..-1][0]  # final directory name
     new Promise (resolve, reject) =>
       parser = new MailParser
       fs.createReadStream(filename).pipe(parser)

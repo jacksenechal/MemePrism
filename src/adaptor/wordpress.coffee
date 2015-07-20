@@ -1,6 +1,7 @@
 { json, log, p, pjson } = require 'lightsaber'
 _ = require 'lodash'
-Promise = require "bluebird"
+Promise = require 'bluebird'
+wporg = require 'wporg'
 rest = require 'restler'
 escapeHtml = require 'escape-html'
 debugWp = require('debug')('wordpress')
@@ -8,6 +9,11 @@ debugWp = require('debug')('wordpress')
 class Wordpress
 
   constructor: (@config) ->
+    @wordpress = wporg.createClient
+      username: @config.wpUsername
+      password: @config.wpPassword
+      url: "#{@config.wpUrl}/xmlrpc.php"
+
     @postToThread = {}
     @threadToPost = {}
 
@@ -15,26 +21,18 @@ class Wordpress
     debugWp args...
 
   buildThreadMapping: (pageNum) ->
-    pageNum ?= 1
-    @listPageOfPosts(pageNum).then (posts) =>
-      return if _.isEmpty posts
-      for post in posts
-        for meta in post.post_meta
-          if meta.key is 'threadId'
-            @postToThread[post.ID] = meta.value
-            break
-      @buildThreadMapping(pageNum+1)
-
-  listPageOfPosts: (pageNumber) ->
-    postsPerPage = 10
-    @debug "Fetching thread IDs: page #{pageNumber}"
-    new Promise (resolve, reject) =>
-      url = "#{@config.wpUrl}/wp-json/posts?" +
-          "context=edit&" +
-          "filter[post_status]=any&" +
-          "filter[offset]=#{(pageNumber-1)*postsPerPage}"
-      request = rest.get url, username: @config.wpUsername, password: @config.wpPassword
-      request.on 'complete', resolve
+    filter = number: 100000
+    promise = new Promise (resolve, reject) =>
+      @wordpress.getPosts filter, null, (error, posts) =>
+        if error
+          throw error
+        else
+          for post in posts
+            for field in post.custom_fields
+              if field.key is 'threadId'
+                  @postToThread[post.post_id] = field.value
+        resolve()
+    promise
 
   massageThreadMaps: ->
     threadToPosts = {}
@@ -63,7 +61,7 @@ class Wordpress
       options =
         date: originalMessage.date
         title: originalMessage.subject or throw new Error "No subject for message #{json originalMessage}"
-        threadId: originalMessage.threadId
+        threadId: originalMessage.threadId ? throw new Error "No thread ID for #{json originalMessage}"
       @createOrUpdateMessage postContent, options
     else
       Promise.resolve()
@@ -121,6 +119,7 @@ class Wordpress
         username: @config.wpUsername, password: @config.wpPassword,
         data: data
     else
+
       @debug "Creating: #{data.date} :: #{data.title}"
       data.post_meta = [{key: 'threadId', value: options.threadId}]
       request = rest.post "#{@config.wpUrl}/wp-json/posts",
