@@ -30,7 +30,7 @@ class Wordpress
           for post in posts
             for field in post.custom_fields
               if field.key is 'threadId'
-                  @postToThread[post.post_id] = field.value
+                @postToThread[post.post_id] = field.value
         resolve()
     promise
 
@@ -40,12 +40,15 @@ class Wordpress
       threadToPosts[thread] ?= []
       threadToPosts[thread].push post
 
-    errors = _.pick threadToPosts, (posts, thread) -> posts.length > 1
-    unless _.isEmpty errors
-      console.error "Fatal Error: Multiple wordpress posts for the following thread IDs:"
-      console.error "Please delete these posts and try again"
-      console.error pjson errors
-      process.exit 1
+    for thread, posts of threadToPosts
+      if posts.length > 1
+        for extra_post_id in posts[1..-1]
+          do (extra_post_id) =>
+            @wordpress.deletePost extra_post_id, (error, posts) =>
+              if error
+                throw error
+              else
+                @debug "Deleted extra post ##{extra_post_id}"
 
     for thread, post of threadToPosts
       @threadToPost[thread] = post[0]
