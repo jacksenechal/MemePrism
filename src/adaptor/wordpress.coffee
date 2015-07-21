@@ -60,11 +60,12 @@ class Wordpress
     messages.sort (a, b) -> a.date - b.date
     originalMessage = messages[0]
     postContent = @formatPost messages
+    p 333, json originalMessage.threadId
     if postContent
       options =
         date: originalMessage.date
-        title: originalMessage.subject or throw new Error "No subject for message #{json originalMessage}"
-        threadId: originalMessage.threadId ? throw new Error "No thread ID for #{json originalMessage}"
+        title: originalMessage.subject or throw new Error("No subject for message #{pjson originalMessage}")
+        threadId: originalMessage.threadId or throw new Error("No thread ID for #{pjson originalMessage}")
       @createOrUpdateMessage postContent, options
     else
       Promise.resolve()
@@ -106,30 +107,56 @@ class Wordpress
       .replace /\n\s*>.*?$/gm, ''   # lines beginning with >
 
   createOrUpdateMessage: (postContent, options) ->
-    postId = @threadToPost[options.threadId]
+    new Promise (resolve, reject) =>
+      postId = @threadToPost[options.threadId]
+      p 111, @threadToPost
+      p 222, options.threadId
 
-    data =
-      type: 'post'
-      status: 'private'  # 'publish'
-      title: options.title
-      content_raw: postContent
-      date: options.date?.toISOString()
+      data =
+        post_type:    'post'
+        post_status:  'publish'
+        post_date:    options.date?.toISOString()
+        post_content: postContent
+        post_title:   options.title
+        terms_names:
+          category: ['Discussion Thread']
+          # post_tag: ['Tag One','Tag Two', 'Tag Three']
+        custom_fields: [
+          {key: 'threadId', value: options.threadId}
+        ]
 
-    if postId?
-      postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
-      @debug "Updating: #{postId} :: #{data.date} :: #{data.title}"
-      request = rest.put postUrl,
-        username: @config.wpUsername, password: @config.wpPassword,
-        data: data
-    else
+      if postId?
+        @debug "Updating: #{postId} :: #{data.post_date} :: #{data.post_title}"
+        @wp.editPost postId, data, resolve
+      else
+        @debug "Creating: #{data.post_date} :: #{data.post_title}"
+        #@wp.createPost postId, data
 
-      @debug "Creating: #{data.date} :: #{data.title}"
-      data.post_meta = [{key: 'threadId', value: options.threadId}]
-      request = rest.post "#{@config.wpUrl}/wp-json/posts",
-        username: @config.wpUsername, password: @config.wpPassword,
-        data: data
-
-    new Promise (resolve, reject) ->
-      request.on 'complete', resolve
+  # # OLD JSON API VERSION:
+  # createOrUpdateMessage: (postContent, options) ->
+  #   postId = @threadToPost[options.threadId]
+  #
+  #   data =
+  #     type: 'post'
+  #     status: 'private'  # 'publish'
+  #     title: options.title
+  #     content_raw: postContent
+  #     date: options.date?.toISOString()
+  #
+  #   if postId?
+  #     postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
+  #     @debug "Updating: #{postId} :: #{data.date} :: #{data.title}"
+  #     request = rest.put postUrl,
+  #       username: @config.wpUsername, password: @config.wpPassword,
+  #       data: data
+  #   else
+  #     @debug "Creating: #{data.date} :: #{data.title}"
+  #     data.post_meta = [{key: 'threadId', value: options.threadId}]
+  #     request = rest.post "#{@config.wpUrl}/wp-json/posts",
+  #       username: @config.wpUsername, password: @config.wpPassword,
+  #       data: data
+  #
+  #   new Promise (resolve, reject) ->
+  #     request.on 'complete', resolve
 
 module.exports = Wordpress
