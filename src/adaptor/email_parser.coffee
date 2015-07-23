@@ -4,8 +4,10 @@ path = require 'path'
 Promise = require("bluebird")
 MailParser = require("mailparser").MailParser
 
+Email = require './email'
+
 class EmailParser
-  readFiles: (directoryName)->
+  readFiles: (directoryName) ->
     files = fs.readdirSync(directoryName)
     promises = Promise.map files, (file) =>
       filePath = path.resolve directoryName, file
@@ -17,20 +19,15 @@ class EmailParser
 
     Promise.all(promises)
 
-  readFile: (filename)->
-    filename = filename[0...-1] if filename.match(/// /$ ///)  # trim trailing slash
-    threadDirectory = filename.split('/')[-2..-2][0]  # final directory name
+  readFile: (filename) ->
     new Promise (resolve, reject) =>
       parser = new MailParser
       fs.createReadStream(filename).pipe(parser)
-      parser.on 'end', (email)->
-        email.threadId = threadDirectory
-        resolve email
-
-#  read: (emailData)->
-#    parser = new MailParser
-#    parser.on 'end', @callback
-#    parser.write emailData
-#    parser.end()
+      parser.on 'end', (email) ->
+        wrappedEmail = Email.wrap email, { filename }
+        if wrappedEmail.valid
+          resolve wrappedEmail
+        else
+          Promise.resolve()
 
 module.exports = EmailParser

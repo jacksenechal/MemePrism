@@ -54,7 +54,6 @@ class Wordpress
 
   writeThread: (messages) ->
     post = new WordpressPost messages
-    post.massage()
     @createOrUpdatePost post
 
   createOrUpdatePost: (post) ->
