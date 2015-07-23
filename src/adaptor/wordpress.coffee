@@ -7,6 +7,7 @@ escapeHtml = require 'escape-html'
 debugWp = require('debug')('wordpress')
 
 class Wordpress
+  MAX_EXPECTED_WP_POSTS: 1e+6
 
   constructor: (@config) ->
     @wordpress = wporg.createClient
@@ -41,17 +42,13 @@ class Wordpress
       threadToPosts[thread].push post
 
     for thread, posts of threadToPosts
-      if posts.length > 1
-        for extra_post_id in posts[1..-1]
+      @threadToPost[thread] = posts.shift
+      if posts.length > 0
+        for extra_post_id in posts
           do (extra_post_id) =>
             @wordpress.deletePost extra_post_id, (error, posts) =>
-              if error
-                throw error
-              else
-                @debug "Deleted extra post ##{extra_post_id}"
-
-    for thread, post of threadToPosts
-      @threadToPost[thread] = post[0]
+              throw error if error
+              @debug "Deleted extra post ##{extra_post_id}"
 
     @debug "Thread to post mapping:"
     @debug pjson @threadToPost
