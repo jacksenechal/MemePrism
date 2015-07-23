@@ -1,5 +1,6 @@
 { log, p } = require 'lightsaber'
 fs = require 'fs'
+path = require 'path'
 Promise = require("bluebird")
 MailParser = require("mailparser").MailParser
 
@@ -7,7 +8,7 @@ class EmailParser
   readFiles: (directoryName)->
     files = fs.readdirSync(directoryName)
     promises = Promise.map files, (file) =>
-      filePath = directoryName+'/'+file
+      filePath = path.resolve directoryName, file
       if fs.lstatSync(filePath).isDirectory()
         @readFiles filePath
       else
