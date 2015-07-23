@@ -6,6 +6,8 @@ MailParser = require("mailparser").MailParser
 
 Email = require './email'
 
+DEBUG = 1
+
 class EmailParser
   readFiles: (directoryName) ->
     files = fs.readdirSync(directoryName)
@@ -23,11 +25,19 @@ class EmailParser
     new Promise (resolve, reject) =>
       parser = new MailParser
       fs.createReadStream(filename).pipe(parser)
-      parser.on 'end', (email) ->
-        wrappedEmail = Email.wrap email, { filename }
-        if wrappedEmail.valid
-          resolve wrappedEmail
+      parser.on 'end', (email) =>
+        Email.massage email, { filename }
+        @debugSave email, filename
+        if email.valid
+          resolve email
         else
           Promise.resolve()
+
+  debugSave: (email, filename) ->
+    if DEBUG
+      cb = (err) -> console.error err if err
+      slug = filename.split('/')[-2..-1].join('-')
+      fs.writeFile "tmp/#{slug}-ORIG.txt", email.text, cb
+      fs.writeFile "tmp/#{slug}-POST.txt", email.cleanText, cb
 
 module.exports = EmailParser

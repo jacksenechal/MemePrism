@@ -2,10 +2,12 @@
 escapeHtml = require 'escape-html'
 
 class Email
-  @wrap: (email, options) ->
+  EMAIL_PATTERN = '\\b[\\w.+-]+@[a-z0-9-.]+\\b'
+  EMAIL_REMOVED = '[...]'
+
+  @massage: (email, options) ->
     @cleanMessage email
     @setThreadId email, options
-    email
 
   @cleanMessage: (email) ->
     throw pjson(message) if email.id?  # make sure there is no @email.id already
@@ -26,9 +28,10 @@ class Email
 
   @cleanText: (text) ->
     text
-      .replace /<mailto:.+?>/g, '<(removed)>'
-      .replace /\b[\w.+-]+@[a-z0-9-.]+\b/ig, '<(removed)>'
-      .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
       .replace /\n\s*>.*?$/gm, ''   # lines beginning with >
+      .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
+      .replace ///<?#{EMAIL_PATTERN}\s?<mailto:#{EMAIL_PATTERN}>>?///gi, EMAIL_REMOVED
+      .replace ///<mailto:#{EMAIL_PATTERN}>///gi, EMAIL_REMOVED
+      .replace ///<?#{EMAIL_PATTERN}>?///gi, EMAIL_REMOVED
 
 module.exports = Email
