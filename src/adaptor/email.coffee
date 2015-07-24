@@ -1,4 +1,4 @@
-{ log, p } = require 'lightsaber'
+{ json, log, p } = require 'lightsaber'
 escapeHtml = require 'escape-html'
 
 class Email
@@ -15,6 +15,7 @@ class Email
     email.valid = email.id?
     email.cleanText = escapeHtml @cleanText email.text
     email.fromName = email.from?[0]?.name or email.from?[0]?.address
+    email.subject = email.subject.replace /^\s*(Re|Fwd|:|\[|\]| )+\s*/i, ''
     unless email.fromName
       console.error "No name found :: message.from is #{json email.from} :: message ID is #{email.id}"
     unless email.date
@@ -28,8 +29,10 @@ class Email
 
   @cleanText: (text) ->
     text
+      .replace /(--)?\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
+      .replace /\s*From:(.|\n)+\s*To:(.|\n)*/, ''
+      .replace ///\s*On .+ \d{4} .+, .+ wrote:(.|\n)*///, ''
       .replace /\n\s*>.*?$/gm, ''   # lines beginning with >
-      .replace /--\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
       .replace ///<?#{EMAIL_PATTERN}\s?<mailto:#{EMAIL_PATTERN}>>?///gi, EMAIL_REMOVED
       .replace ///<mailto:#{EMAIL_PATTERN}>///gi, EMAIL_REMOVED
       .replace ///<?#{EMAIL_PATTERN}>?///gi, EMAIL_REMOVED

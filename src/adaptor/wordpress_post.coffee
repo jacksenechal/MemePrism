@@ -15,6 +15,8 @@ class WordpressPost
 
   html: ->
     sections = for message in @messages
+      tokens = message.cleanText.split(/ +/)
+      leadText = tokens[0...10].join ' '  # for WP plugin to index
       """
         <section>
           <h3>#{message.fromName}</h3>
@@ -22,6 +24,7 @@ class WordpressPost
             <i>#{message.date}</i>
           </p>
           <div>
+            <h5 style="display:none">#{leadText}</h5>
             #{message.cleanText}
           </div>
         </section>
