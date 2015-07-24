@@ -21,8 +21,8 @@ class Wordpress
     @threadToPost = {}
 
   buildThreadMapping: (pageNum) ->
-    filter = number: 100000
-    promise = new Promise (resolve, reject) =>
+    new Promise (resolve, reject) =>
+      filter = number: MAX_EXPECTED_WP_POSTS
       @wordpress.getPosts filter, null, (error, posts) =>
         if error
           throw error
@@ -32,7 +32,6 @@ class Wordpress
               if field.key is 'threadId'
                 @postToThread[post.post_id] = field.value
         resolve()
-    promise
 
   massageThreadMaps: ->
     threadToPosts = {}
@@ -49,38 +48,32 @@ class Wordpress
               throw error if error
               debug "Deleted extra post ##{extra_post_id}"
 
-    debug "Thread to post mapping:"
-    debug pjson @threadToPost
+    # debug "Thread to post mapping:"
+    # debug pjson @threadToPost
 
   writeThread: (messages) ->
-    post = new WordpressPost messages
-    @createOrUpdatePost post
-
-  createOrUpdatePost: (post) ->
-    postId = @threadToPost[post.threadId]
+    post = new WordpressPost messages, wpUrl: @config.wpUrl
+    post.id = @threadToPost[post.threadId]
 
     data =
-      type: 'post'
-      status: 'private'  # 'publish'
-      title: post.title
-      content_raw: post.content
-      date: post.date?.toISOString()
+      post_type:    'post'
+      post_status:  'publish'
+      post_date:    post.date
+      post_content: post.content
+      post_title:   post.title
+      terms_names:
+        category: ['Discussion Thread']
+        # post_tag: ['Tag One','Tag Two', 'Tag Three']
 
-    if postId?
-      postUrl = "#{@config.wpUrl}/wp-json/posts/#{postId}"
-      debug "Updating: #{postId} :: #{data.date} :: #{data.title}"
-      request = rest.put postUrl,
-        username: @config.wpUsername, password: @config.wpPassword,
-        data: data
+    if post.id?
+      @wordpress.editPost post.id, data, (error, result) ->
+        raise error if error
+        debug "Updated: #{post.info()}"
     else
-
-      debug "Creating: #{data.date} :: #{data.title}"
-      data.post_meta = [{key: 'threadId', value: post.threadId}]
-      request = rest.post "#{@config.wpUrl}/wp-json/posts",
-        username: @config.wpUsername, password: @config.wpPassword,
-        data: data
-
-    new Promise (resolve, reject) ->
-      request.on 'complete', resolve
+      data.custom_fields = [ {key: 'threadId', value: post.threadId} ]
+      @wordpress.newPost data, (error, postId) ->
+        raise error if error
+        post.id = postId
+        debug "Created: #{post.info()}"
 
 module.exports = Wordpress

@@ -4,7 +4,8 @@ debug = require('debug')('wordpress')
 
 class WordpressPost
 
-  constructor: (@messages) ->
+  constructor: (@messages, options) ->
+    @wpUrl = options.wpUrl or throw new Error "wpUrl required for post"
     @messages.sort (a, b) -> a.date - b.date
     originalMessage = @messages[0]
     @date = originalMessage.date
@@ -26,5 +27,8 @@ class WordpressPost
         </section>
       """
     sections.join "\n\n<hr />\n\n"
+
+  info: ->
+    "#{@wpUrl}/?p=#{@id} :: #{@title} :: #{@date}"
 
 module.exports = WordpressPost

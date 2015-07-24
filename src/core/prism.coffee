@@ -17,13 +17,13 @@ class Prism
       process.exit 1
 
 
-  write: (config, threads, callback) ->
+  write: (config, threads) ->
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
         wordpress.massageThreadMaps()
         for threadId, thread of threads
-          wordpress.writeThread(thread).then callback
+          wordpress.writeThread thread
     else
       console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1
@@ -37,10 +37,6 @@ class Prism
         threads[email.threadId] ?= []
         threads[email.threadId].push email
 
-      @write config, threads, (data) ->
-        if data?.guid?
-          log data.guid
-        else
-          console.error data or "UNPROCESSABLE"
+      @write config, threads
 
 module.exports = Prism
