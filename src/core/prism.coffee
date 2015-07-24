@@ -18,12 +18,16 @@ class Prism
 
 
   write: (config, threads) ->
+    postCount = 0
+    delay = 3 * 1000
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
         wordpress.massageThreadMaps()
         for threadId, thread of threads
-          wordpress.writeThread thread
+          do (threadId, thread) =>
+            setTimeout (=> wordpress.writeThread thread), delay * postCount++
+
     else
       console.error 'No known target to write to: requires Wordpress URL, username, and password.'
       process.exit 1

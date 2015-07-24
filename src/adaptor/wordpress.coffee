@@ -48,8 +48,8 @@ class Wordpress
               throw error if error
               debug "Deleted extra post ##{extra_post_id}"
 
-    # debug "Thread to post mapping:"
-    # debug pjson @threadToPost
+    debug "Thread to post mapping:"
+    debug pjson @threadToPost
 
   writeThread: (messages) ->
     post = new WordpressPost messages, wpUrl: @config.wpUrl
@@ -67,15 +67,15 @@ class Wordpress
 
     if post.id?
       @wordpress.editPost post.id, data, (error, result) ->
-        raise error if error
+        throw error if error
         debug "Updated: #{post.info()}"
     else
       data.custom_fields = [
         {key: 'threadId', value: post.threadId}
-        {key: '_wpac_is_members_only', value: 'true'} 
+        {key: '_wpac_is_members_only', value: 'true'}
       ]
       @wordpress.newPost data, (error, postId) ->
-        raise error if error
+        throw error if error
         post.id = postId
         debug "Created: #{post.info()}"
 
