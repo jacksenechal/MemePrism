@@ -22,7 +22,7 @@ class Wordpress
 
   buildThreadMapping: (pageNum) ->
     new Promise (resolve, reject) =>
-      filter = number: MAX_EXPECTED_WP_POSTS
+      filter = number: @MAX_EXPECTED_WP_POSTS
       @wordpress.getPosts filter, null, (error, posts) =>
         if error
           throw error
@@ -70,7 +70,10 @@ class Wordpress
         raise error if error
         debug "Updated: #{post.info()}"
     else
-      data.custom_fields = [ {key: 'threadId', value: post.threadId} ]
+      data.custom_fields = [
+        {key: 'threadId', value: post.threadId}
+        {key: '_wpac_is_members_only', value: 'true'} 
+      ]
       @wordpress.newPost data, (error, postId) ->
         raise error if error
         post.id = postId
