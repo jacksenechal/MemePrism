@@ -3,7 +3,7 @@ escapeHtml = require 'escape-html'
 
 class Email
   EMAIL_PATTERN = '\\b[\\w.+-]+@[a-z0-9-.]+\\b'
-  EMAIL_REMOVED = '[...]'
+  REMOVED = '[...]'
 
   @massage: (email, options) ->
     @cleanMessage email
@@ -15,7 +15,7 @@ class Email
     email.valid = email.id?
     email.cleanText = escapeHtml @cleanText email.text
     email.fromName = email.from?[0]?.name or email.from?[0]?.address
-    email.subject = email.subject.replace /^\s*(Re|Fwd|:|\[|\]| )+\s*/i, ''
+    email.subject = email.subject.replace /^(\bRe\b|\bFwd\b|:|\[|\]| )+\s*/i, ''
     unless email.fromName
       console.error "No name found :: message.from is #{json email.from} :: message ID is #{email.id}"
     unless email.date
@@ -30,11 +30,15 @@ class Email
   @cleanText: (text) ->
     text
       .replace /(--)?\s*You received this message because you are subscribed to the Google Group(.|\n)*/, ''
-      .replace /\s*From:(.|\n)+\s*To:(.|\n)*/, ''
+      .replace /(--)?\s*To post to this group, send email to (.|\n)*/, ''
+      .replace /(--)?\s*To unsubscribe from this group and stop receiving emails from it, send an email to (.|\n)*/, ''
+      .replace /(--)?\s*You received this message because you are subscribed to the Google Groups (.|\n)*/, ''
+      .replace /(\n\s*(From|Sent|Cc|Date|To|Subject|Bcc): .+){3}(.|\n)*/, ''
       .replace ///\s*On .+ \d{4} .+, .+ wrote:(.|\n)*///, ''
       .replace /\n\s*>.*?$/gm, ''   # lines beginning with >
-      .replace ///<?#{EMAIL_PATTERN}\s?<mailto:#{EMAIL_PATTERN}>>?///gi, EMAIL_REMOVED
-      .replace ///<mailto:#{EMAIL_PATTERN}>///gi, EMAIL_REMOVED
-      .replace ///<?#{EMAIL_PATTERN}>?///gi, EMAIL_REMOVED
+      .replace ///<?#{EMAIL_PATTERN}\s?<mailto:#{EMAIL_PATTERN}>>?///gi, REMOVED
+      .replace ///<mailto:#{EMAIL_PATTERN}>///gi, REMOVED
+      .replace ///<?#{EMAIL_PATTERN}>?///gi, REMOVED
+      .replace /\[Image removed by sender\.\]\s*<\S+>/gi, REMOVED
 
 module.exports = Email
