@@ -16,7 +16,7 @@
     "coffee-script": "^1.9.3",
     "commander": "^2.8.1",
     "debug": "^2.2.0",
-    "escape-html": "^1.0.1",
+    "he": "^0.5.0",
     "lightsaber": "^0.4.1",
     "lodash": "^3.9.3",
     "mailparser": "^0.5.1",

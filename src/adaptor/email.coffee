@@ -1,5 +1,5 @@
 { json, log, p } = require 'lightsaber'
-escapeHtml = require 'escape-html'
+htmlEncode = require('he').encode
 
 class Email
   EMAIL_PATTERN = '\\b[\\w.+-]+@[a-z0-9-.]+\\b'
@@ -13,7 +13,7 @@ class Email
     throw pjson(message) if email.id?  # make sure there is no @email.id already
     email.id = email.headers?['message-id']
     email.valid = email.id?
-    email.cleanText = escapeHtml @cleanText email.text
+    email.cleanText = htmlEncode @cleanText email.text
     email.fromName = email.from?[0]?.name or email.from?[0]?.address
     email.subject = email.subject.replace /^(\bRe\b|\bFwd\b|:|\[|\]| )+\s*/i, ''
     unless email.fromName
