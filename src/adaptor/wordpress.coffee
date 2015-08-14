@@ -2,14 +2,14 @@
 _ = require 'lodash'
 Promise = require 'bluebird'
 wporg = require 'wporg'
-rest = require 'restler'
-escapeHtml = require 'escape-html'
 debug = require('debug')('wordpress')
+chalk = require 'chalk'
 
 WordpressPost = require './wordpress_post'
 
 class Wordpress
-  MAX_EXPECTED_WP_POSTS: 1e+6
+  red = chalk.bold.red
+  MAX_EXPECTED_WP_POSTS = 1e+6
 
   constructor: (@config) ->
     @wordpress = wporg.createClient
@@ -22,7 +22,7 @@ class Wordpress
 
   buildThreadMapping: (pageNum) ->
     new Promise (resolve, reject) =>
-      filter = number: @MAX_EXPECTED_WP_POSTS
+      filter = number: MAX_EXPECTED_WP_POSTS
       @wordpress.getPosts filter, null, (error, posts) =>
         if error
           throw error
@@ -67,16 +67,20 @@ class Wordpress
 
     if post.id?
       @wordpress.editPost post.id, data, (error, result) ->
-        throw error if error
-        debug "Updated: #{post.info()}"
+        if error
+          console.error red error
+        else
+          debug "Updated: #{post.info()}"
     else
       data.custom_fields = [
         {key: 'threadId', value: post.threadId}
         {key: '_wpac_is_members_only', value: 'true'}
       ]
       @wordpress.newPost data, (error, postId) ->
-        throw error if error
-        post.id = postId
-        debug "Created: #{post.info()}"
+        if error
+          console.error red error
+        else
+          post.id = postId
+          debug "Created: #{post.info()}"
 
 module.exports = Wordpress
