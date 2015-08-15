@@ -19,7 +19,7 @@ class Prism
 
   write: (config, threads) ->
     postCount = 0
-    delay = 1 * 1000
+    delay = 2 * 1000
     if config.wpUrl and config.wpUsername and config.wpPassword
       wordpress = new Wordpress config
       wordpress.buildThreadMapping().then =>
