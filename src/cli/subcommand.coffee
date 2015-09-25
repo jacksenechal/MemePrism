@@ -1,4 +1,5 @@
 { log, p } = require 'lightsaber'
+_ = require 'lodash'
 Prism = require '../core/prism'
 config = require 'commander'
 
@@ -6,18 +7,23 @@ class CLI
   SUBCOMMANDS = {}
 
   SUBCOMMANDS.read = [
-    ['option', '-f, --email-file <Email File>', 'File which contains a raw mime-formatted email to parse']
-    ['option', '-d, --email-directory <Directory>', 'Directory which contains raw email files and subdirectories containing email files.']
+    ['option', '-t, --mongo-port <Port Number>', 'Local mongodb port']
+    ['option', '-d, --mongo-db-name <DB Name>', 'Local mongodb database name']
+    # ['option', '-f, --email-file <Email File>', 'File which contains a raw mime-formatted email to parse']
+    # ['option', '-d, --email-directory <Directory>', 'Directory which contains raw email files and subdirectories containing email files.']
   ]
 
   SUBCOMMANDS.write = [
+    ['option', '-t, --mongo-port <Port Number>', 'Local mongodb port']
+    ['option', '-d, --mongo-db-name <DB Name>', 'Local mongodb database name']
     ['option', '-u, --wp-url <Wordpress REST API URL>']
     ['option', '-n, --wp-username <Wordpress username>']
     ['option', '-p, --wp-password <Wordpress password>']
   ]
 
-  SUBCOMMANDS.update = SUBCOMMANDS.read[...]    # make a copy of SUBCOMMANDS.read
-  SUBCOMMANDS.update.push SUBCOMMANDS.write...
+  SUBCOMMANDS.migrate = SUBCOMMANDS.read[...]    # make a copy of SUBCOMMANDS.export
+  SUBCOMMANDS.migrate.push SUBCOMMANDS.write...
+  SUBCOMMANDS.migrate = _.uniq SUBCOMMANDS.migrate, (n) -> n[1]
 
   exec: (subcommand) ->
     options = SUBCOMMANDS[subcommand]

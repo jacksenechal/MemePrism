@@ -18,9 +18,11 @@
     "commander": "^2.8.1",
     "debug": "^2.2.0",
     "he": "^0.5.0",
+    "js-md5": "^0.3.0",
     "lightsaber": "^0.4.1",
     "lodash": "^3.9.3",
     "mailparser": "^0.5.1",
+    "mongodb-bluebird": "0.0.8",
     "wporg": "^0.1.0"
   },
   "devDependencies": {
