@@ -37,43 +37,69 @@ class Wordpress
     #   [x, type, data] = mediaRegex.exec match
     #   @writeMedia data, type
 
-    data =
-      post_type:    'post'
-      post_status:  'publish'
-      post_date:    article.created_on
-      post_content: content
-      post_title:   article.title
-      post_author:  1 #@authors[article.author]
-      post_excerpt: article.description
-      # post_thumbnail: article.thumb
-      # article.image
-      post_status: if article.draft then 'draft' else 'publish'
-      post_name: article.slug
-      # terms_names:
-      #   category: [@categories[article.category]]
-        # post_tag: ['Tag One','Tag Two', 'Tag Three']
+    @writeMedia url: article.image
+      .then (imageId) =>
+        imageUrl = "/xxx/#{imageId}"
 
-    log "writing article: #{article.title}"
-    # log data
+        data =
+          post_type:    'post'
+          post_status:  'publish'
+          post_date:    article.created_on
+          post_content: content
+          post_title:   article.title
+          post_author:  1 #@authors[article.author]
+          post_excerpt: article.description
+          # post_format: 'image'
+          # post_thumbnail: imageUrl
+          post_status: if article.draft then 'draft' else 'publish'
+          post_name: article.slug
+          # terms_names:
+          #   category: [@categories[article.category]]
+            # post_tag: ['Tag One','Tag Two', 'Tag Three']
 
-    @wordpress.newPost data, (error, id) ->
-      if error
-        console.error red error, "\narticle: ", article.title
-      else
-        debug "created article: #{id}"
+        log "writing article: #{article.title}"
+        # log data
 
-  writeMedia: (data, type, filename) ->
-    media =
-      name: filename or "#{md5 data}.#{type.split('/')[1]}"
-      type: type
-      bits: new Buffer data, 'base64'
-      overwrite: false
+        @wordpress.newPost data, (error, id) ->
+          if error
+            console.error red error, "\narticle: ", article.title
+          else
+            debug "created article: #{id}"
 
-    log "writing media: #{media.name}, #{media.type}"
-    @wordpress.uploadFile media, (error, id) ->
-      if error
-        console.error red error, "\nfilename: ", media.name
-      else
-        debug "created media: #{id}"
+  writeMedia: ({url, data, type, filename}) ->
+    new Promise (resolve, reject) =>
+      if url?
+        {data, type, filename} = @_getRemoteMedia url
+      else if data? and type? and not filename?
+        filename = "#{md5 data}.#{type.split('/')[1]}"
+      else unless data? and type? and filename?
+        reject "Insufficient arguments. Need either URL, or data, type, and filename"
+
+      media =
+        name: filename
+        type: type
+        bits: new Buffer data, 'base64'
+        overwrite: false
+
+      log "writing media: #{media.name}, #{media.type}"
+      @wordpress.uploadFile media, (error, id) ->
+        if error
+          console.error red error, "\nfilename: ", media.name
+          reject error
+        else
+          debug "created media: #{id}"
+          resolve id
+
+  _getRemoteMedia: (url) ->
+    # download image from url
+    # https://www.npmjs.com/package/file-type
+    # convert to buffer
+    data = 'xxx'
+    # get mime type
+    type = 'xxx'
+    # extract filename
+    filename = 'xxx'
+
+    {data, type, filename}
 
 module.exports = Wordpress
