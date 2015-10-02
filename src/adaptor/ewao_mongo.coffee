@@ -1,6 +1,7 @@
 { log, p } = require 'lightsaber'
 Promise = require 'bluebird'
 mongo = require 'mongodb-bluebird'
+_ = require 'lodash'
 
 DEBUG = 1
 

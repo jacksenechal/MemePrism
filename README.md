@@ -1,18 +1,17 @@
-# MemePrism
-
-Build status: [![Circle CI](https://circleci.com/gh/citizencode/MemePrism.svg?style=svg)](https://circleci.com/gh/citizencode/MemePrism)
+# Prism
 
 ## Setup
 
     npm install
 
-## Publishing to Wordpress from a folder of emails (in mbox format)
+## Migrating content from Meteor app to Wordpress
 
 Getting help:
 
-     bin/prism update -h
+     bin/prism help
+     bin/prism help migrate
 
 Example:
 
-    bin/prism update  --wp-url http://domain.of.your.wordpress.installation --wp-username <USERNAME> --wp-password <PASSWORD> --email-directory any/relative/path/to/emails/ 
+    bin/prism migrate  --wp-url http://domain.of.your.wordpress.installation --wp-username <USERNAME> --wp-password <PASSWORD> --mongo-port <PORT> --mongo-db-name <DBNAME>
 

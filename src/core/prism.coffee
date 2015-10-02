@@ -27,11 +27,9 @@ class Prism
         .then (articles) =>
           for article in articles
             wordpress.writeArticle article
-            # do (article) =>
-            #   setTimeout (=> wordpress.writeArticle article), delay * postCount++
 
     else
-      console.error 'No known target to write to: requires Wordpress URL, username, and password.'
+      console.error 'Insufficient options: requires Wordpress URL, username, and password, as well as MongoDB port and DB name.'
       process.exit 1
 
   migrate: (config) ->

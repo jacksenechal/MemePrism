@@ -5,6 +5,10 @@ wporg = require 'wporg'
 debug = require('debug')('wordpress')
 chalk = require 'chalk'
 md5 = require 'js-md5'
+request = require 'request-promise'
+mime = require 'mime'
+fs = require 'fs'
+https = require 'https'
 
 # WordpressPost = require './wordpress_post'
 
@@ -68,12 +72,13 @@ class Wordpress
 
   writeMedia: ({url, data, type, filename}) ->
     new Promise (resolve, reject) =>
-      if url?
-        {data, type, filename} = @_getRemoteMedia url
-      else if data? and type? and not filename?
-        filename = "#{md5 data}.#{type.split('/')[1]}"
-      else unless data? and type? and filename?
+      unless url? or (data? and type? and filename?)
         reject "Insufficient arguments. Need either URL, or data, type, and filename"
+
+      if url?
+        downloaded = @_getRemoteMedia url
+          .then @writeMedia.bind @
+        resolve downloaded
 
       media =
         name: filename
@@ -91,15 +96,18 @@ class Wordpress
           resolve id
 
   _getRemoteMedia: (url) ->
-    # download image from url
-    # https://www.npmjs.com/package/file-type
-    # convert to buffer
-    data = 'xxx'
-    # get mime type
-    type = 'xxx'
-    # extract filename
-    filename = 'xxx'
+    url = @_makeSaneUrl url
+    log "downloading media: #{url}"
+    request uri: url, resolveWithFullResponse: true, encoding: null
+      .then (response) ->
+        type = response.headers['content-type'] or throw new Error "Unable to determine content type for #{url}"
+        ext = mime.extension(type) or throw new Error "Unable to determine extension for #{type}"
+        data = response.body
+        filename = "#{md5 data}.#{ext}"
+        fs.writeFile "tmp/#{filename}", data
+        {data, type, filename}
 
-    {data, type, filename}
+  _makeSaneUrl: (url) ->
+    url.replace /(https?:\/)([^\/])/, '$1/$2'
 
 module.exports = Wordpress
