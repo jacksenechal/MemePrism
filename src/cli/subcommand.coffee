@@ -19,6 +19,7 @@ class CLI
     ['option', '-u, --wp-url <Wordpress REST API URL>']
     ['option', '-n, --wp-username <Wordpress username>']
     ['option', '-p, --wp-password <Wordpress password>']
+    ['option', '-l, --limit <max articles to write>']
   ]
 
   SUBCOMMANDS.migrate = SUBCOMMANDS.read[...]    # make a copy of SUBCOMMANDS.export

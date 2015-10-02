@@ -47,14 +47,15 @@ class Wordpress
     matches = article.content.match(mediaRegex) or []
     for match in matches
       extracts = mediaRegex.exec match
-      type = extracts[1]
-      data = extracts[2]
-      filename = @_makeFilename {data, type}
-      article.content = article.content.replace mediaRegex, "src=\"#{filename}\""
-      mediaLoaded.push @writeMedia {data, type, filename, origUrl: filename}
+      if extracts?
+        type = extracts[1] or console.error "Unable to determine image type", article.title, extracts
+        data = extracts[2] or console.error "Unable to extract image data", article.title, extracts
+        filename = @_makeFilename {data, type}
+        article.content = article.content.replace mediaRegex, "src=\"#{filename}\""
+        mediaLoaded.push @writeMedia {data, type, filename, origUrl: filename}
 
     # capture and save linked images as media files
-    mediaRegex = /<img [^>]*src="([^"]*?)"[^>]*>/gi
+    mediaRegex = /<img [^>]*src="(https?:[^"]*?)"[^>]*>/gi
     matches = article.content.match(mediaRegex) or []
     for match in matches
       debug 'match', match

@@ -25,7 +25,8 @@ class Prism
       wordpress = new EwaoWordpress config
       ewao.readArticles()
         .then (articles) =>
-          for article in articles
+          for article, i in articles
+            if i >= config.limit then break
             wordpress.writeArticle article
 
     else
