@@ -42,9 +42,7 @@ class Wordpress
     #   @writeMedia data, type
 
     @writeMedia url: article.image
-      .then (imageId) =>
-        imageUrl = "/xxx/#{imageId}"
-
+      .then (media) =>
         data =
           post_type:    'post'
           post_status:  'publish'
@@ -53,8 +51,7 @@ class Wordpress
           post_title:   article.title
           post_author:  1 #@authors[article.author]
           post_excerpt: article.description
-          # post_format: 'image'
-          # post_thumbnail: imageUrl
+          post_thumbnail: media.id
           post_status: if article.draft then 'draft' else 'publish'
           post_name: article.slug
           # terms_names:
@@ -85,15 +82,16 @@ class Wordpress
         type: type
         bits: new Buffer data, 'base64'
         overwrite: false
+        url: "/wp-content/uploads/2015/10/#{filename}"
 
       log "writing media: #{media.name}, #{media.type}"
-      @wordpress.uploadFile media, (error, id) ->
+      @wordpress.uploadFile media, (error, result) ->
         if error
-          console.error red error, "\nfilename: ", media.name
+          console.error red error, "\nfilename: ", result.file
           reject error
         else
-          debug "created media: #{id}"
-          resolve id
+          log "created media: #{JSON.stringify result}"
+          resolve result
 
   _getRemoteMedia: (url) ->
     url = @_makeSaneUrl url
