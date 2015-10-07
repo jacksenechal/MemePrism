@@ -26,12 +26,33 @@ class Wordpress
 
     @authors = {}
 
+    @authors =
+      "7XPndDhEQCMofviJZ": '11' # ashley - ashyylovee@yahoo.com - Ashley Altenbern
+      "LCutc9SHbhMALgWkt": '13' # anonymous - blackmarketconsulting@gmail.com - Anonymous
+      "v3aBMkaHmSWpMkMhc": '9'  # amanda - bloomforlife@gmail.com - Amanda Froelich
+      "tcGKZzTLAcQA4Gjrk": '8'  # raven - carmie1980@hotmail.com - Raven Fon
+      "TjgTD5tg7q2MgrYQd": '14' # jesse - Herman.jesse@gmail.com - Jesse Herman
+      "62dfZzoGwnW59Gj4C": '10' # jenna - jenna.wylie22@gmail.com - Jenna Barrington
+      "QvzL58troDRsqGbNB": '18' # jennifer - Jenniferbogausch@yahoo.com - Jennifer Bogausch
+      "oWXQXReiMru7duMMo": '4'  # jocelyn - jocelyn_daher@yahoo.com - Jocelyn Daher
+      "Cdv79t5N7L4Y4Dcvf": '12' # lisa - Jupiterhorizon@yahoo.com - Lisa Falcon G
+      "bK76AZdrkTNvp5SXw": '3'  # kevin - kevin@ewao.com - Kevin Buijs
+      "Sm5ooiDSBhyxBjYac": '6'  # kirsten - kirstencowart@gmail.com - Kirsten Cowart
+      "5mC97DZkzRfMhPY7d": '7'  # laura - lauracweber@yahoo.com - Laura W.
+      "rd6RCdtAiAm2a3hdv": '5'  # ivan - nano1302@gmail.com - Ivan
+      "zDQ99NYyNoz3Nu29d": '15' # patrick - patrickml.pml@yahoo.com - Patrick Lewis
+      "dQfkJLzbqxLX25ygA": '15' # patrick - patrickml.pml@yahoo.com - Patrick Lewis
+      "qLwjkxnJo4TNM6HEA": '20' # ryan - Pleiadianpower@gmail.com - Ryan McKenna
+      "rv8YEn83nM8mj7YiF": '21' # sean - sean.buijs21@gmail.com - Sean Bujis
+      "xqoWwq8LH2Lac8jRm": '16' # susan - shbtherapies@gmail.com - Susan Harrington-Baker
+      "Lo8dno5zaaA4YoH5c": '17' # kathe - Theloveartist@gmail.com - Kathe Izzo
+
     @categories =
-      "5xf4F6wNdCvn99kqj": '1' # "News"
-      "zEG4a7tHmychqAqH7": '2' # "Inspiration"
-      "kFyCNMFZ4gyf4sM9T": '3' # "Health & Wellness"
-      "uwj6gP5w3tcDCHRE4": '4' # "Flower of Life"
-      "8tpkEKhLLPoiWdFLz": '5' # "Universe Explorers"
+      "5xf4F6wNdCvn99kqj": 'news'               # "News"
+      "zEG4a7tHmychqAqH7": 'inspiration'        # "Inspiration"
+      "kFyCNMFZ4gyf4sM9T": 'health-wellness'    # "Health & Wellness"
+      "uwj6gP5w3tcDCHRE4": 'flower-of-life'     # "Flower of Life"
+      "8tpkEKhLLPoiWdFLz": 'universe-explorers' # "Universe Explorers"
 
     @whenReady = @_getMediaLibrary()
       .then (media) => @media = media
@@ -108,23 +129,23 @@ class Wordpress
             post_date:    article.created_on
             post_content: article.content
             post_title:   article.title
-            post_author:  1 #@authors[article.author]
+            post_author:  @authors[article.author_id]
             post_excerpt: article.description
             post_thumbnail: featuredImage.id
             post_status: if article.draft then 'draft' else 'publish'
             post_name: article.slug
             terms_names:
               category: [@categories[article.category]]
-              post_tag: ['EWAO Archive']
+              post_tag: ['ewao-archive']
 
           log "writing article: #{article.title}"
           # log data
 
-          @wordpress.newPost data, (error, id) ->
+          @wordpress.newPost data, (error, id) =>
             if error
               console.error red error, "\narticle: ", article.title
             else
-              debug "created article: #{id}"
+              debug "created article: #{id}, #{article.title}, #{@config.wpUrl}/?p=#{id}"
 
   writeMedia: ({url, data, type, filename, origUrl, md5sum}) ->
     @whenReady.then =>
@@ -141,6 +162,7 @@ class Wordpress
           resolve
             origUrl: origUrl
             url: @media[md5sum].link
+            id: @media[md5sum].attachment_id
         else
           file =
             name: filename
@@ -151,7 +173,7 @@ class Wordpress
           log "writing media file: #{file.name}, #{file.type}"
           @wordpress.uploadFile file, (error, result) ->
             if error
-              console.error red error, "\nfilename: ", result.file
+              console.error red error, "\nfilename: ", file.name
               reject error
             else
               result.origUrl = origUrl
