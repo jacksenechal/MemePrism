@@ -48,11 +48,11 @@ class Wordpress
       "Lo8dno5zaaA4YoH5c": '17' # kathe - Theloveartist@gmail.com - Kathe Izzo
 
     @categories =
-      "5xf4F6wNdCvn99kqj": 'news'               # "News"
-      "zEG4a7tHmychqAqH7": 'inspiration'        # "Inspiration"
-      "kFyCNMFZ4gyf4sM9T": 'health-wellness'    # "Health & Wellness"
-      "uwj6gP5w3tcDCHRE4": 'flower-of-life'     # "Flower of Life"
-      "8tpkEKhLLPoiWdFLz": 'universe-explorers' # "Universe Explorers"
+      "5xf4F6wNdCvn99kqj": "News"
+      "zEG4a7tHmychqAqH7": "Inspiration"
+      "kFyCNMFZ4gyf4sM9T": "Health & Wellness"
+      "uwj6gP5w3tcDCHRE4": "Flower of Life"
+      "8tpkEKhLLPoiWdFLz": "Universe Explorers"
 
     @whenReady = @_getMediaLibrary()
       .then (media) => @media = media
