@@ -27,25 +27,25 @@ class Wordpress
     @authors = {}
 
     @authors =
-      "7XPndDhEQCMofviJZ": '11' # ashley - ashyylovee@yahoo.com - Ashley Altenbern
-      "LCutc9SHbhMALgWkt": '13' # anonymous - blackmarketconsulting@gmail.com - Anonymous
-      "v3aBMkaHmSWpMkMhc": '9'  # amanda - bloomforlife@gmail.com - Amanda Froelich
-      "tcGKZzTLAcQA4Gjrk": '8'  # raven - carmie1980@hotmail.com - Raven Fon
-      "TjgTD5tg7q2MgrYQd": '14' # jesse - Herman.jesse@gmail.com - Jesse Herman
-      "62dfZzoGwnW59Gj4C": '10' # jenna - jenna.wylie22@gmail.com - Jenna Barrington
-      "QvzL58troDRsqGbNB": '18' # jennifer - Jenniferbogausch@yahoo.com - Jennifer Bogausch
-      "oWXQXReiMru7duMMo": '4'  # jocelyn - jocelyn_daher@yahoo.com - Jocelyn Daher
-      "Cdv79t5N7L4Y4Dcvf": '12' # lisa - Jupiterhorizon@yahoo.com - Lisa Falcon G
-      "bK76AZdrkTNvp5SXw": '3'  # kevin - kevin@ewao.com - Kevin Buijs
-      "Sm5ooiDSBhyxBjYac": '6'  # kirsten - kirstencowart@gmail.com - Kirsten Cowart
-      "5mC97DZkzRfMhPY7d": '7'  # laura - lauracweber@yahoo.com - Laura W.
-      "rd6RCdtAiAm2a3hdv": '5'  # ivan - nano1302@gmail.com - Ivan
-      "zDQ99NYyNoz3Nu29d": '15' # patrick - patrickml.pml@yahoo.com - Patrick Lewis
-      "dQfkJLzbqxLX25ygA": '15' # patrick - patrickml.pml@yahoo.com - Patrick Lewis
-      "qLwjkxnJo4TNM6HEA": '20' # ryan - Pleiadianpower@gmail.com - Ryan McKenna
-      "rv8YEn83nM8mj7YiF": '21' # sean - sean.buijs21@gmail.com - Sean Bujis
-      "xqoWwq8LH2Lac8jRm": '16' # susan - shbtherapies@gmail.com - Susan Harrington-Baker
-      "Lo8dno5zaaA4YoH5c": '17' # kathe - Theloveartist@gmail.com - Kathe Izzo
+      "7XPndDhEQCMofviJZ": '11'
+      "LCutc9SHbhMALgWkt": '13'
+      "v3aBMkaHmSWpMkMhc": '9' 
+      "tcGKZzTLAcQA4Gjrk": '8' 
+      "TjgTD5tg7q2MgrYQd": '14'
+      "62dfZzoGwnW59Gj4C": '10'
+      "QvzL58troDRsqGbNB": '18'
+      "oWXQXReiMru7duMMo": '4' 
+      "Cdv79t5N7L4Y4Dcvf": '12'
+      "bK76AZdrkTNvp5SXw": '3' 
+      "Sm5ooiDSBhyxBjYac": '6' 
+      "5mC97DZkzRfMhPY7d": '7' 
+      "rd6RCdtAiAm2a3hdv": '5' 
+      "zDQ99NYyNoz3Nu29d": '15'
+      "dQfkJLzbqxLX25ygA": '15'
+      "qLwjkxnJo4TNM6HEA": '20'
+      "rv8YEn83nM8mj7YiF": '21'
+      "xqoWwq8LH2Lac8jRm": '16'
+      "Lo8dno5zaaA4YoH5c": '17'
 
     @categories =
       "5xf4F6wNdCvn99kqj": "News"
