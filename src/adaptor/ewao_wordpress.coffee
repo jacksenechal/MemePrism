@@ -29,17 +29,17 @@ class Wordpress
     @authors =
       "7XPndDhEQCMofviJZ": '11'
       "LCutc9SHbhMALgWkt": '13'
-      "v3aBMkaHmSWpMkMhc": '9' 
-      "tcGKZzTLAcQA4Gjrk": '8' 
+      "v3aBMkaHmSWpMkMhc": '9'
+      "tcGKZzTLAcQA4Gjrk": '8'
       "TjgTD5tg7q2MgrYQd": '14'
       "62dfZzoGwnW59Gj4C": '10'
       "QvzL58troDRsqGbNB": '18'
-      "oWXQXReiMru7duMMo": '4' 
+      "oWXQXReiMru7duMMo": '4'
       "Cdv79t5N7L4Y4Dcvf": '12'
-      "bK76AZdrkTNvp5SXw": '3' 
-      "Sm5ooiDSBhyxBjYac": '6' 
-      "5mC97DZkzRfMhPY7d": '7' 
-      "rd6RCdtAiAm2a3hdv": '5' 
+      "bK76AZdrkTNvp5SXw": '3'
+      "Sm5ooiDSBhyxBjYac": '6'
+      "5mC97DZkzRfMhPY7d": '7'
+      "rd6RCdtAiAm2a3hdv": '5'
       "zDQ99NYyNoz3Nu29d": '15'
       "dQfkJLzbqxLX25ygA": '15'
       "qLwjkxnJo4TNM6HEA": '20'
@@ -115,14 +115,18 @@ class Wordpress
           debug 'url', url
           mediaLoaded.push @writeMedia {url}
 
-      # once all media has been loaded
-      Promise.all mediaLoaded
+      # once all media has been loaded (or failed)
+      Promise.settle mediaLoaded
         .then (media) => # replace media urls in article
           for file in media
-            article.content = article.content.replace new RegExp(escapeStringRegexp file.origUrl), file.url
+            if file.isFulfilled()
+              file = file.value()
+              article.content = article.content.replace new RegExp(escapeStringRegexp file.origUrl), file.url
+            else
+              console.error red "Article has missing media: #{article.title}"
           media
         .then (media) => # write article to wordpress
-          featuredImage = media[0]
+          featuredImage = if media[0].isFulfilled() then media[0].value() else {}
           data =
             post_type:    'post'
             post_status:  'publish'
@@ -134,6 +138,7 @@ class Wordpress
             post_thumbnail: featuredImage.id
             post_status: if article.draft then 'draft' else 'publish'
             post_name: article.slug
+            comment_status: 'open'
             terms_names:
               category: [@categories[article.category]]
               post_tag: ['ewao-archive']
@@ -154,9 +159,12 @@ class Wordpress
           reject "Insufficient arguments. Need either URL, or all of: data, type, md5sum and filename"
 
         if url?
-          downloaded = @_getRemoteMedia url
+          @_getRemoteMedia url
             .then @writeMedia.bind @
-          resolve downloaded
+            .then resolve
+            .error (error) =>
+              console.error red "Error downloading file: #{url}\n", error
+              reject error
         else if @media[md5sum]?
           log "using existing media file: #{filename}, #{@media[md5sum].link}"
           resolve
@@ -173,7 +181,7 @@ class Wordpress
           log "writing media file: #{file.name}, #{file.type}"
           @wordpress.uploadFile file, (error, result) ->
             if error
-              console.error red error, "\nfilename: ", file.name
+              console.error red "filename: ", file.name, "\n", error
               reject error
             else
               result.origUrl = origUrl
