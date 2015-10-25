@@ -89,6 +89,7 @@ class Wordpress
 
       # general article cleanup
       article.content = @_sanitizeUrls article.content
+      article.content = @_nukeFormatting article.content
 
       # capture and save base64 encoded images as media files
       base64MediaRegex = /src="data:([^;]*);base64,([^"]*?)"/gi
@@ -210,5 +211,12 @@ class Wordpress
 
   _sanitizeUrls: (body) ->
     body.replace /(https?:\/)([^\/])/gi, '$1/$2'
+
+  _nukeFormatting: (body) ->
+    body
+      .replace /<\/?(span|br)[^>]*>/gmi, ''
+      .replace /style="[^"]*"/gmi, ''
+      .replace /class="[^"]*"/gmi, ''
+      .replace /\n/g, ' '
 
 module.exports = Wordpress
