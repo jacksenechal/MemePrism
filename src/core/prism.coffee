@@ -1,26 +1,32 @@
-fs = require 'fs'
-{ log, p, pjson } = require 'lightsaber'
 Promise = require 'bluebird'
-_ = require 'lodash'
 EwaoWordpress = require '../adaptor/ewao_wordpress'
 EwaoMongo = require '../adaptor/ewao_mongo'
+_ = require 'lodash'
+{ log, p, pjson } = require 'lightsaber'
+{ exec, error } = require 'shelljs'
 
 class Prism
   read: (config) ->
-    # emailParser = new EmailParser
-    # if config.emailFile
-    #   emailParser.readFile config.emailFile
-    # else if config.emailDirectory
-    #   emailParser.readFiles config.emailDirectory
-    # else
-    #   console.error 'No known source to read from'
-    #   process.exit 1
+    remoteCommand = """
+      rm -rf /tmp/prism-mongo-dump \
+      && mkdir -p /tmp/prism-mongo-dump \
+      && cd /tmp/prism-mongo-dump \
+      && mongodump --db #{config.serverMongoDb} --port #{config.serverMongoPort}
+    """
+    res = exec "ssh #{config.serverUser}@#{config.serverHost} '#{remoteCommand}'"
+    if error()? then process.exit 1
+
+    res = exec "rsync -avz #{config.serverUser}@#{config.serverHost}:/tmp/prism-mongo-dump /tmp/"
+    if error()? then process.exit 1
+
+    res = exec "mongorestore --drop --host 127.0.0.1 --port #{config.mongoPort} --db #{config.mongoDb} --dir /tmp/prism-mongo-dump/dump/#{config.mongoDb}"
+    if error()? then process.exit 1
 
 
   write: (config) ->
     postCount = 0
     delay = 0
-    if config.wpUrl and config.wpUsername and config.wpPassword and config.mongoPort and config.mongoDbName
+    if config.wpUrl and config.wpUsername and config.wpPassword and config.mongoPort and config.mongoDb
       ewao = new EwaoMongo config
       wordpress = new EwaoWordpress config
       ewao.readArticles()

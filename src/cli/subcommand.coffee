@@ -7,19 +7,21 @@ class CLI
   SUBCOMMANDS = {}
 
   SUBCOMMANDS.read = [
-    ['option', '-t, --mongo-port <Port Number>', 'Local mongodb port']
-    ['option', '-d, --mongo-db-name <DB Name>', 'Local mongodb database name']
-    # ['option', '-f, --email-file <Email File>', 'File which contains a raw mime-formatted email to parse']
-    # ['option', '-d, --email-directory <Directory>', 'Directory which contains raw email files and subdirectories containing email files.']
+    ['option', '--mongo-port <Port Number>', 'Local mongodb port']
+    ['option', '--mongo-db <DB Name>', 'Local mongodb database name']
+    ['option', '--server-host <Host>', 'IP/domain of remote server']
+    ['option', '--server-user <URL>', 'SSH username on remote server']
+    ['option', '--server-mongo-port <Port Number>', 'Remote mongodb port']
+    ['option', '--server-mongo-db <DB Name>', 'Remote mongodb database name']
   ]
 
   SUBCOMMANDS.write = [
-    ['option', '-t, --mongo-port <Port Number>', 'Local mongodb port']
-    ['option', '-d, --mongo-db-name <DB Name>', 'Local mongodb database name']
-    ['option', '-u, --wp-url <Wordpress REST API URL>']
-    ['option', '-n, --wp-username <Wordpress username>']
-    ['option', '-p, --wp-password <Wordpress password>']
-    ['option', '-l, --limit <max articles to write>']
+    ['option', '--mongo-port <Port Number>', 'Local mongodb port']
+    ['option', '--mongo-db <DB Name>', 'Local mongodb database name']
+    ['option', '--wp-url <Wordpress REST API URL>']
+    ['option', '--wp-username <Wordpress username>']
+    ['option', '--wp-password <Wordpress password>']
+    ['option', '--limit <max articles to write>']
   ]
 
   SUBCOMMANDS.migrate = SUBCOMMANDS.read[...]    # make a copy of SUBCOMMANDS.export

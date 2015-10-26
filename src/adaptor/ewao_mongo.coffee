@@ -9,7 +9,7 @@ class EwaoMongo
   constructor: (@config) ->
 
   readArticles: ->
-    mongo.connect "mongodb://localhost:#{@config.mongoPort}/#{@config.mongoDbName}"
+    mongo.connect "mongodb://localhost:#{@config.mongoPort}/#{@config.mongoDb}"
       .then (db) ->
         log 'mongo connected'
         collection = db.collection 'articles'
