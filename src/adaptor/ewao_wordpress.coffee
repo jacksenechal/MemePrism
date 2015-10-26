@@ -50,7 +50,7 @@ class Wordpress
     @categories =
       "5xf4F6wNdCvn99kqj": "News"
       "zEG4a7tHmychqAqH7": "Inspiration"
-      "kFyCNMFZ4gyf4sM9T": "Health & Wellness"
+      "kFyCNMFZ4gyf4sM9T": "Health &amp; Wellness"
       "uwj6gP5w3tcDCHRE4": "Flower of Life"
       "8tpkEKhLLPoiWdFLz": "Universe Explorers"
 
